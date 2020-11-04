@@ -23,13 +23,16 @@ namespace DeltaX.LinSql.Table.Unitest
         {
             var factory = TableQueryFactory.GetInstance();
 
-            factory.ConfigureTable<Poco>("poco", cfg =>
+            if (!factory.IsConfiguredTable<Poco>())
             {
-                cfg.AddColumn(c => c.Id, "idPoco", true, true);
-                cfg.AddColumn(c => c.Name);
-                cfg.AddColumn(c => c.Updated, p => { p.IgnoreInsert = true; p.IgnoreUpdate = true; });                
-                cfg.AddColumn(c => c.Active);                
-            });
+                factory.ConfigureTable<Poco>("poco", cfg =>
+                {
+                    cfg.AddColumn(c => c.Id, "idPoco", true, true);
+                    cfg.AddColumn(c => c.Name);
+                    cfg.AddColumn(c => c.Updated, p => { p.IgnoreInsert = true; p.IgnoreUpdate = true; });
+                    cfg.AddColumn(c => c.Active);
+                });
+            }
         }
 
         [Test]

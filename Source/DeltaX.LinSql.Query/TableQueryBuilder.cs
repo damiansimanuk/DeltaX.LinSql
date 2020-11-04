@@ -4,40 +4,53 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-     
+
     public class TableQueryBuilder
     {
-        private List<TableConfig> Tables { get; set; }
+        private HashSet<Type> Tables { get; set; }
+        public List<Expression> ExpressionWhere { get; private set; }
+        public List<Expression> ExpressionSelect { get; private set; }
+        public Dictionary<Type, Expression> ExpressionJoin { get; private set; }
 
         public TableQueryBuilder()
         {
-            Tables = new List<TableConfig>();
+            Tables = new HashSet<Type>();
+            ExpressionWhere = new List<Expression>();
+            ExpressionSelect = new List<Expression>();
+            ExpressionJoin = new Dictionary<Type, Expression>();
+        }
+
+        public IEnumerable<Type> GetTables()
+        {
+            return Tables;
         }
 
         public void AddTable<T>()
         {
-            Tables.Add(new TableConfig { TableType = typeof(T) });
+            Tables.Add(typeof(T));
         }
 
-        public TableConfig GetTableConfig<T>()
+        public Type GetTable(Type type)
         {
-            return Tables.FirstOrDefault(t => t.TableType == typeof(T))
-                 ?? throw new ArgumentException($"Table for Type {typeof(T)} is not configurated!");
+            return Tables.FirstOrDefault(t => t == type)
+                 ?? throw new ArgumentException($"Table for Type {type} is not configurated!");
         }
 
-        public void Where<T>(Expression<Func<T, bool>> whereCondition)
-        {
-            var table = GetTableConfig<T>();
-
-            table.ExpressionWhere = whereCondition;
-            new QueryParser(whereCondition);
+        internal void Where(Expression whereCondition)
+        {  
+            ExpressionWhere.Add(whereCondition); 
         }
 
-        public void Select<T>(Expression<Func<T, object>> properties)
+        internal void Select(Expression properties)
         {
-            var table = GetTableConfig<T>();
+            ExpressionSelect.Add(properties);
+        }
 
-            table.ExpressionSelect = properties;
+        internal void Join<T>(Expression properties)
+        {
+            var table = GetTable(typeof(T));
+            ExpressionJoin[table] = properties;
         }
     }
 }
+

@@ -33,16 +33,26 @@
         {
             return GetTable(typeof(TTable));
         }
-
+          
         public ITableConfiguration GetTable(Type type)
         {
             return tablesConfig.GetValueOrDefault(type)
                  ?? throw new ArgumentException($"Table type '{type.Name}' is not configurated!", type.Name);
         }
 
+        public bool IsConfiguredTable<TTable>()
+        {
+            return tablesConfig.GetValueOrDefault(typeof(TTable)) != default;
+        }
+
         public bool IsConfiguredTable(Type type)
         {
             return tablesConfig.GetValueOrDefault(type) != default;
+        }
+
+        public IDictionary<Type, ITableConfiguration> GetConfiguredTables()
+        {
+            return tablesConfig;
         }
 
         public void ConfigureTable<TTable>(string tableName, Action<TableConfiguration<TTable>> configTable)
@@ -170,6 +180,14 @@
             query = query.Replace("{WhereClause}", whereClause);
 
             return query;
+        }
+
+        public string GetSelectColumns<TTable>(bool useTableAlias=true)
+         where TTable : class
+        {
+            var table = GetTable<TTable>();
+
+            return DialectQuery.GetSelectColumns(table, useTableAlias ? table.Identifier : null);
         }
 
         public ColumnConfiguration GetIdentityColumn<TTable>()
