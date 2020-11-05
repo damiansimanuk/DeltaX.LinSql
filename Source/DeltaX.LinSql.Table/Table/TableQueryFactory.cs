@@ -75,12 +75,22 @@
             AddTable(table);
         }
 
+        public void AddTable<TTable>()
+           where TTable : class
+        {
+            if (!IsConfiguredTable<TTable>())
+            {
+                var table = TableConfiguration<TTable>.AutoConfigure();
+                AddTable(table);
+            }
+        }
+
         public void AddTable<TTable>(TableConfiguration<TTable> table)
            where TTable : class
         {
             table.InvalidatePk();
             tablesConfig.Add(typeof(TTable), table);
-        }
+        } 
 
 
         public string GetPagedListQuery<TTable>(int skipCount = 0, int rowsPerPage = 1000, string whereClause = null, string orderByClause = null)

@@ -403,5 +403,45 @@ namespace DeltaX.LinSql.Query.UniTest
             Assert.AreEqual(1, param.Count());
             Assert.AreEqual(2, param["arg_0"]);
         }
+
+        [Test]
+        public void test_QueryBuilder_parser_single()
+        {
+            var q = new QueryBuilder<Poco>();
+
+            q.Select(t => new { t.Id, t.Name, t.Active })
+                .Where((t) => t.Active && t.Id == 2);
+
+            var stream = q.Parse();
+            var sql = stream.GetSql();
+            var param = stream.GetParameters();
+
+            Assert.AreEqual("SELECT t_1.\"idPoco\" as \"Id\", t_1.\"Name\", t_1.\"Active\" " +
+                "\nFROM poco t_1 " +
+                "\nWHERE t_1.\"Active\" <> 0 AND (t_1.\"idPoco\" = @arg_0)", sql.Trim());
+            Assert.AreEqual(1, param.Count());
+            Assert.AreEqual(2, param["arg_0"]);
+        }
+
+        [Test]
+        public void test_QueryBuilder_parser_single2()
+        {
+            var q = new QueryBuilder<Poco>();
+
+            q.Where((t) => t.Active && t.Id == 2);
+
+            var stream = q.Parse();
+            var sql = stream.GetSql();
+            var param = stream.GetParameters();
+
+            Assert.AreEqual("SELECT t_1.\"idPoco\" as \"Id\"" +
+                "\n\t, t_1.\"Name\"" +
+                "\n\t, t_1.\"Updated\"" +
+                "\n\t, t_1.\"Active\" " +
+                "\nFROM poco t_1 " +
+                "\nWHERE t_1.\"Active\" <> 0 AND (t_1.\"idPoco\" = @arg_0)", sql.Trim());
+            Assert.AreEqual(1, param.Count());
+            Assert.AreEqual(2, param["arg_0"]);
+        }
     }
 }

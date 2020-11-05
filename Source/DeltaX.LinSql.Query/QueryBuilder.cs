@@ -47,7 +47,12 @@
             }
             if (!selecAdded)
             {
-                stream.AddSql("SELECT *");
+                stream.AddSql("SELECT ");
+                var tablesColumnsSelect = Builder.GetTables()
+                    .Select(t => tableFactory.GetTable(t))
+                    .Select(t => tableFactory.DialectQuery.GetSelectColumns(t, t.Identifier));
+
+                stream.AddSql(string.Join(", ", tablesColumnsSelect)); 
             }
              
             // Table FROM

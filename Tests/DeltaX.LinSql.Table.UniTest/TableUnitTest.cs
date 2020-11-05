@@ -1,5 +1,7 @@
 using NUnit.Framework;
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DeltaX.LinSql.Table.Unitest
 {
@@ -9,6 +11,22 @@ namespace DeltaX.LinSql.Table.Unitest
         public int Id { get; set; }
         public string Name { get; set; }
         public DateTime Updated { get; set; }
+        public bool Active { get; set; }
+    }
+
+    [Table(name: "Poco2Table", Schema = "Demo")]
+    public class Poco2
+    {
+        [Key]
+        public int Id { get; set; }
+        
+        [Column("PocoName")]
+        public string Name { get; set; }
+        
+        [Editable(false)]
+        public DateTime Updated { get; set; }
+        
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public bool Active { get; set; }
     }
 
@@ -32,7 +50,7 @@ namespace DeltaX.LinSql.Table.Unitest
                     cfg.AddColumn(c => c.Updated, p => { p.IgnoreInsert = true; p.IgnoreUpdate = true; });
                     cfg.AddColumn(c => c.Active);
                 });
-            }
+            } 
         }
 
         [Test]
@@ -79,6 +97,34 @@ namespace DeltaX.LinSql.Table.Unitest
             var sql = factory.GetSingleQuery<Poco>( );
 
             Assert.AreEqual("SELECT \n\tt_1.\"idPoco\" as \"Id\"\n\t, t_1.\"Name\"\n\t, t_1.\"Updated\"\n\t, t_1.\"Active\" \nFROM poco t_1 \nWHERE t_1.\"idPoco\" = @Id", sql.Trim());
+        }
+
+        [Test]
+        public void test_autoConfigured_table()
+        {
+            var factory = TableQueryFactory.GetInstance();
+            factory.AddTable<Poco2>();
+
+            var sql = factory.GetSingleQuery<Poco2>();
+
+            Assert.AreEqual("SELECT " +
+                "\n\tt_1.\"Id\"" +
+                "\n\t, t_1.\"PocoName\" as \"Name\"" +
+                "\n\t, t_1.\"Updated\"" +
+                "\n\t, t_1.\"Active\" " +
+                "\nFROM Demo.Poco2Table t_1 " +
+                "\nWHERE t_1.\"Id\" = @Id", sql.Trim());
+
+            sql = factory.GetInsertQuery<Poco2>();
+            Assert.AreEqual("INSERT INTO Demo.Poco2Table " +
+                "\n\t(\"PocoName\", \"Updated\") VALUES" +
+                "\n\t(@Name, @Updated)", sql.Trim());
+
+            sql = factory.GetUpdateQuery<Poco2>();
+            Assert.AreEqual("UPDATE Demo.Poco2Table SET" +
+                "\n\t \"PocoName\" = @Name " +
+                "\nWHERE \"Id\" = @Id", sql.Trim());
+
         }
     }
 }
