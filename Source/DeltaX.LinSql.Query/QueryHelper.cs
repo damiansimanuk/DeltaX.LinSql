@@ -76,7 +76,10 @@
             }
             if (expression is MemberExpression memberExpression)
             {
-                return filterType == null || filterType.Contains(memberExpression.Expression?.Type) ? expression : null;
+                return memberExpression?.Expression?.NodeType == ExpressionType.Parameter
+                    && (filterType == null || filterType.Contains(memberExpression.Expression?.Type))
+                    ? expression
+                    : null;
             }
             return null;
         }

@@ -35,6 +35,7 @@ namespace DeltaX.LinSql.Table.Unitest
         [SetUp]
         public void Setup()
         {
+            ConfigureTalbes();
         }
 
         public void ConfigureTalbes()
@@ -50,7 +51,9 @@ namespace DeltaX.LinSql.Table.Unitest
                     cfg.AddColumn(c => c.Updated, p => { p.IgnoreInsert = true; p.IgnoreUpdate = true; });
                     cfg.AddColumn(c => c.Active);
                 });
-            } 
+            }
+
+            factory.AddTable<Poco2>();
         }
 
         [Test]
@@ -92,6 +95,7 @@ namespace DeltaX.LinSql.Table.Unitest
         public void TestSelect()
         {
             ConfigureTalbes();
+            ConfigureTalbes();
             var factory = TableQueryFactory.GetInstance();
 
             var sql = factory.GetSingleQuery<Poco>( );
@@ -103,17 +107,16 @@ namespace DeltaX.LinSql.Table.Unitest
         public void test_autoConfigured_table()
         {
             var factory = TableQueryFactory.GetInstance();
-            factory.AddTable<Poco2>();
-
+             
             var sql = factory.GetSingleQuery<Poco2>();
 
             Assert.AreEqual("SELECT " +
-                "\n\tt_1.\"Id\"" +
-                "\n\t, t_1.\"PocoName\" as \"Name\"" +
-                "\n\t, t_1.\"Updated\"" +
-                "\n\t, t_1.\"Active\" " +
-                "\nFROM Demo.Poco2Table t_1 " +
-                "\nWHERE t_1.\"Id\" = @Id", sql.Trim());
+                "\n\tt_2.\"Id\"" +
+                "\n\t, t_2.\"PocoName\" as \"Name\"" +
+                "\n\t, t_2.\"Updated\"" +
+                "\n\t, t_2.\"Active\" " +
+                "\nFROM Demo.Poco2Table t_2 " +
+                "\nWHERE t_2.\"Id\" = @Id", sql.Trim());
 
             sql = factory.GetInsertQuery<Poco2>();
             Assert.AreEqual("INSERT INTO Demo.Poco2Table " +
