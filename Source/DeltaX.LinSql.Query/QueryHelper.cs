@@ -10,6 +10,10 @@
     {
         public static object GetValueFromExpression(Expression expression)
         {
+            if(expression is LambdaExpression lambda)
+            {
+                return lambda.Compile().DynamicInvoke();
+            } 
             return Expression.Lambda(expression).Compile().DynamicInvoke();
         }
 

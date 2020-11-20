@@ -2,6 +2,7 @@
 {
     using DeltaX.LinSql.Table;
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -29,39 +30,92 @@
             return Builder.GetTable(type);
         }
 
+        public (string sql, IDictionary<string, object> parameters) GetSqlParameters(TableQueryFactory tableFactory = null)
+        {
+            var stream = Parse(tableFactory);
+            return (stream.GetSql(), stream.GetParameters());
+        }
+
         public QueryStream Parse(TableQueryFactory tableFactory = null)
         {
             tableFactory ??= TableQueryFactory.GetInstance();
             var allowedTables = Builder.GetTables();
             var stream = new QueryStream(null, allowedTables);
 
-            // SELECT
-            bool selecAdded = false;
-            foreach (var expression in Builder.ExpressionSelect)
-            {
-                stream.AddSql(selecAdded ? "\n\t, " : "SELECT ");
-                selecAdded = true;
-
-                var s = new SelectParser(expression);
-                stream.AddSql(s.GetSql());
-            }
-            if (!selecAdded)
-            {
-                stream.AddSql("SELECT ");
-                var tablesColumnsSelect = Builder.GetTables()
-                    .Select(t => tableFactory.GetTable(t))
-                    .Select(t => tableFactory.DialectQuery.GetSelectColumns(t, t.Identifier));
-
-                stream.AddSql(string.Join(", ", tablesColumnsSelect)); 
-            }
-             
             // Table FROM
-            var typeFrom = Builder.GetTables().First();
-            var tableFrom = tableFactory.GetTable(typeFrom);
-            var tableName = tableFactory.DialectQuery.GetTableName(tableFrom, tableFrom.Identifier); 
+            var typeFirst = Builder.GetTables().First();
+            var tableFirst = tableFactory.GetTable(typeFirst);
+
+            // DELETE
+            if (Builder.MakeDelete)
+            {
+                stream.AddSql($"DELETE {tableFirst.Identifier}");
+            }
+            // UPDATE FIRST TABLE
+            else if (Builder.MakeUpdate && Builder.TableUpdate != null && Builder.TableUpdate.GetType() == typeFirst)
+            {
+                stream.AddSql($"UPDATE {tableFirst.Identifier}");
+
+                var first = true;
+                foreach (var col in tableFirst.GetUpdateColumns())
+                {
+                    var colName = tableFactory.DialectQuery.Encapsulation(col.DbColumnName, tableFirst.Identifier);
+                    stream.AddSql(first
+                        ? $"\n\tSET {colName} = "
+                        : $"\n\t, {colName} = ");
+                    stream.AddParameter(col.GetPropertyInfo().GetValue(Builder.TableUpdate));
+                    first = false;
+                }
+            }
+            // UPDATE WITH SET
+            else if (Builder.MakeUpdate && Builder.TableUpdate == null)
+            {
+                var identifiers = Builder.ExpressionSet.Select(s => tableFactory.GetTable(s.Key).Identifier);
+                stream.AddSql($"UPDATE {string.Join(", ", identifiers)}");
+
+                var first = true;
+                foreach (var value in Builder.ExpressionSet.SelectMany(s => s.Value))
+                {
+                    var member = QueryHelper.GetFirstMemberExpression(value.Item1, allowedTables) as MemberExpression;
+                    if (member != null)
+                    {
+                        stream.AddSql(first ? "\n\tSET " : "\n\t, ");
+                        stream.AddColumn(member.Expression.Type, member.Member.Name);
+                        stream.AddOperator("=");
+                        stream.AddParameter(value.Item2);
+                        first = false;
+                    }
+                }
+            }
+            // SELECT
+            else
+            {
+                bool selecAdded = false;
+                foreach (var expression in Builder.ExpressionSelect)
+                {
+                    stream.AddSql(selecAdded ? "\n\t, " : "SELECT ");
+                    selecAdded = true;
+
+                    var s = new SelectParser(expression);
+                    stream.AddSql(s.GetSql());
+                }
+                // SELECT ALL
+                if (!selecAdded)
+                {
+                    stream.AddSql("SELECT ");
+                    var tablesColumnsSelect = Builder.GetTables()
+                        .Select(t => tableFactory.GetTable(t))
+                        .Select(t => tableFactory.DialectQuery.GetSelectColumns(t, t.Identifier));
+
+                    stream.AddSql(string.Join(", ", tablesColumnsSelect));
+                }
+            }
+
+            // FROM  
+            var tableName = tableFactory.DialectQuery.GetTableName(tableFirst, tableFirst.Identifier);
             stream.AddSql($" \nFROM {tableName}");
 
-            // Tables JOIN
+            // JOIN
             foreach (var table in Builder.ExpressionJoin)
             {
                 var tableJoin = tableFactory.GetTable(table.Key);
@@ -74,13 +128,13 @@
 
             // WHERE
             bool whereAdded = false;
-            foreach (var expression in Builder .ExpressionWhere)
+            foreach (var expression in Builder.ExpressionWhere)
             {
                 stream.AddOperator(whereAdded ? "\n\tAND" : "\nWHERE");
                 whereAdded = true;
-                 
+
                 var qp = new QueryParser(stream);
-                qp.Visit(expression); 
+                qp.Visit(expression);
             }
 
             return stream;
@@ -110,6 +164,30 @@
         public QueryBuilder<T1> Where(Expression<Func<T1, bool>> properties)
         {
             Builder.Where(properties);
+            return this;
+        }
+
+        public QueryBuilder<T1> Delete()
+        {
+            Builder.Delete();
+            return this;
+        }
+
+        public QueryBuilder<T1> Set<P1>(Expression<Func<T1, P1>> property, P1 value)
+        {
+            Builder.Set<T1>(property, value);
+            return this;
+        }
+
+        public QueryBuilder<T1> Set<P1>(Expression<Func<T1, P1>> property, Expression<Func<P1>> value)
+        {
+            Builder.Set<T1>(property, value);
+            return this;
+        }
+
+        public QueryBuilder<T1> Update(T1 table)
+        { 
+            Builder.Update<T1>(table);
             return this;
         }
     }

@@ -2,6 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <RepositoryUrl>https://github.com/damiansimanuk/DeltaX.LinSql</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/damiansimanuk/DeltaX.LinSql</PackageProjectUrl>
+    <Authors>DeltaX</Authors>
+    <PackageId>DeltaX_LinSql_Query</PackageId>
+    <FileVersion>1.0.0.1</FileVersion>
+    <Description>Parse Lambda Expresion, generate SQL Queries</Description>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>DeltaX</Authors>
+    <PackageProjectUrl>https://github.com/damiansimanuk/DeltaX.LinSql</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/damiansimanuk/DeltaX.LinSql</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <PackageId>DeltaX_LinSql_Table</PackageId>
+    <FileVersion>1.0.1.1</FileVersion>
+    <Description>Parse Poco Class and generate SQL Query for CRUD operations</Description>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
 </Project>

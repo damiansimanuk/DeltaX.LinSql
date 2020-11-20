@@ -130,7 +130,8 @@
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            if (stream.IsAllowed(node.Expression.Type)
+            if (node.Expression.NodeType == ExpressionType.Parameter
+                && stream.IsAllowed(node.Expression.Type)
                 && stream.AddColumn(node.Expression.Type, node.Member.Name))
             {
                 var lastOp = LastOperator();
@@ -157,6 +158,13 @@
                 stream.AddExpression(node);
                 return node;
             }
+
+            // // External Variable Value
+            // if (QueryHelper.IsVariable(node.Expression))
+            // {
+            //     stream.AddExpression(node.Expression);
+            //     return node;
+            // }
 
             return base.VisitMember(node);
         }

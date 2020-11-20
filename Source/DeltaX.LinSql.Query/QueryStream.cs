@@ -16,9 +16,9 @@
         private TableQueryFactory tableFactory;
         private int paramGeneratorOffset = 0;
 
-        public QueryStream(TableQueryFactory tableFactory = null, IEnumerable<Type> allowedTables = null, int paramGeneratorOffset = 0)
+        public QueryStream(TableQueryFactory tableFactory = null, IEnumerable<Type> allowedTables = null, int? paramGeneratorOffset = null)
         {
-            this.paramGeneratorOffset = paramGeneratorOffset;
+            this.paramGeneratorOffset = paramGeneratorOffset ?? 0;
             this.tableFactory = tableFactory ?? TableQueryFactory.GetInstance();
             this.AllowedTables = allowedTables ?? this.tableFactory.GetConfiguredTables().Select(t => t.Key).ToArray();
         }

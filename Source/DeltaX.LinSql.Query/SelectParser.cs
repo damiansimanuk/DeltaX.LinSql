@@ -13,10 +13,11 @@
         private QueryStream stream;  
         private bool openBrace;
 
-        public SelectParser(Expression expression, TableQueryFactory tableFactory = null, IEnumerable<Type> tableTypes = null, bool openBrace = false)
+        public SelectParser(Expression expression, TableQueryFactory tableFactory = null, IEnumerable<Type> allowedTables = null,
+            int? paramGeneratorOffset = null, bool openBrace = false)
         {
             this.openBrace = openBrace;
-            this.stream = new QueryStream(tableFactory, tableTypes);
+            this.stream = new QueryStream(tableFactory, allowedTables, paramGeneratorOffset);
             Visit(expression);
         }
 
