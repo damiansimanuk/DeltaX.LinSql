@@ -34,12 +34,7 @@
         public IDictionary<string, object> GetParameters()
         {
             return stream.GetParameters();
-        }
-
-        public IDictionary<ITableConfiguration, HashSet<ColumnConfiguration>> GetTableColumns()
-        {
-            return stream.GetTableColumns();
-        }
+        } 
 
         public override Expression Visit(Expression node)
         {

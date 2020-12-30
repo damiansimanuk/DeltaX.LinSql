@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace DeltaX.LinSql.Query.UniTest
 {
@@ -39,7 +40,7 @@ namespace DeltaX.LinSql.Query.UniTest
             if (!factory.IsConfiguredTable<Poco>())
             {
                 factory.ConfigureTable<Poco>("poco", cfg =>
-                {
+                { 
                     cfg.AddColumn(c => c.Id, "idPoco", true, true);
                     cfg.AddColumn(c => c.Name);
                     cfg.AddColumn(c => c.Updated, p => { p.IgnoreInsert = true; p.IgnoreUpdate = true; });
@@ -54,7 +55,7 @@ namespace DeltaX.LinSql.Query.UniTest
                     cfg.AddColumn(c => c.Id, null, true, true);
                     cfg.AddColumn(c => c.FullName);
                     cfg.AddColumn(c => c.Updated, p => { p.IgnoreInsert = true; p.IgnoreUpdate = true; });
-                    cfg.AddColumn(c => c.Active);
+                    cfg.AddColumn(c => c.Active); 
                 });
             }
         }
@@ -66,14 +67,11 @@ namespace DeltaX.LinSql.Query.UniTest
 
             var qp = new QueryParser(expression);
             var whereSql = qp.GetSql();
-            var param = qp.GetParameters();
-            var tableColumns = qp.GetTableColumns().ToList();
+            var param = qp.GetParameters(); 
 
             Assert.AreEqual("t_1.\"idPoco\" = @arg_0", whereSql);
             Assert.IsTrue(param.ContainsKey("arg_0"));
             Assert.AreEqual(2, param["arg_0"]);
-            Assert.AreEqual("poco", tableColumns[0].Key.Name);
-            Assert.AreEqual(1, tableColumns[0].Value.Count());
 
             Assert.Pass();
         }
@@ -87,12 +85,9 @@ namespace DeltaX.LinSql.Query.UniTest
 
             var qp = new QueryParser(expression);
             var whereSql = qp.GetSql();
-            var param = qp.GetParameters();
-            var tableColumns = qp.GetTableColumns().ToList();
+            var param = qp.GetParameters(); 
 
-            Assert.AreEqual("(t_1.\"idPoco\" = @arg_0) AND (t_1.\"Updated\" < @arg_1)", whereSql);
-            Assert.AreEqual(2, tableColumns[0].Value.Count());
-            Assert.AreEqual("poco", tableColumns[0].Key.Name);
+            Assert.AreEqual("(t_1.\"idPoco\" = @arg_0) AND (t_1.\"Updated\" < @arg_1)", whereSql); 
 
             Assert.AreEqual(2, param.Count());
             Assert.IsTrue(param.ContainsKey("arg_0"));
@@ -398,7 +393,7 @@ namespace DeltaX.LinSql.Query.UniTest
             Assert.AreEqual("SELECT t_1.\"Active\"" +
                 "\n\t, t_2.\"Id\", t_2.\"FullName\" " +
                 "\nFROM poco t_1 " +
-                "\nJOIN poco2 t_2 ON t_1.\"idPoco\" = t_2.\"Id\" " +
+                "\nJOIN poco2 t_2 ON t_1.\"idPoco\" = t_2.\"Id\"" +
                 "\nWHERE t_1.\"Active\" <> 0 AND (t_2.\"Id\" = @arg_0)", sql.Trim());
             Assert.AreEqual(1, param.Count());
             Assert.AreEqual(2, param["arg_0"]);
@@ -417,7 +412,7 @@ namespace DeltaX.LinSql.Query.UniTest
             var param = stream.GetParameters();
 
             Assert.AreEqual("SELECT t_1.\"idPoco\" as \"Id\", t_1.\"Name\", t_1.\"Active\" " +
-                "\nFROM poco t_1 " +
+                "\nFROM poco t_1" +
                 "\nWHERE t_1.\"Active\" <> 0 AND (t_1.\"idPoco\" = @arg_0)", sql.Trim());
             Assert.AreEqual(1, param.Count());
             Assert.AreEqual(2, param["arg_0"]);
@@ -428,17 +423,18 @@ namespace DeltaX.LinSql.Query.UniTest
         {
             var q = new QueryBuilder<Poco>();
 
-            q.Where((t) => t.Active && t.Id == 2);
+            q.Where((t) => t.Active && t.Id == 2).SelectAll();
 
             var stream = q.Parse();
             var sql = stream.GetSql();
             var param = stream.GetParameters();
 
-            Assert.AreEqual("SELECT t_1.\"idPoco\" as \"Id\"" +
+            Assert.AreEqual("SELECT " +
+                "\n\tt_1.\"idPoco\" as \"Id\"" +
                 "\n\t, t_1.\"Name\"" +
                 "\n\t, t_1.\"Updated\"" +
                 "\n\t, t_1.\"Active\" " +
-                "\nFROM poco t_1 " +
+                "\nFROM poco t_1" +
                 "\nWHERE t_1.\"Active\" <> 0 AND (t_1.\"idPoco\" = @arg_0)", sql.Trim());
             Assert.AreEqual(1, param.Count());
             Assert.AreEqual(2, param["arg_0"]);
@@ -458,7 +454,7 @@ namespace DeltaX.LinSql.Query.UniTest
             var param = stream.GetParameters();
 
             Assert.AreEqual("DELETE t_1 " +
-                "\nFROM poco t_1 " +
+                "\nFROM poco t_1" +
                 "\nWHERE t_1.\"Active\" <> 0 AND (t_1.\"idPoco\" = @arg_0)", sql.Trim());
             Assert.AreEqual(1, param.Count());
             Assert.AreEqual(2, param["arg_0"]);
@@ -468,29 +464,29 @@ namespace DeltaX.LinSql.Query.UniTest
         [Test]
         public void test_QueryBuilder_parser_update_set()
         {
-            var var = true;
+            var value = true;
             var q = new QueryBuilder<Poco>();
             q.Where((t) => t.Active && t.Id == 2)
                 .Set(t => t.Name, "ElNombre")
-                .Set(t => t.Active, () => var == true);
+                .Set(t => t.Active, () => value);
 
             var stream = q.Parse();
             var sql = stream.GetSql();
             var param = stream.GetParameters();
 
             Assert.AreEqual("UPDATE t_1" +
-                "\n\tSET t_1.\"Name\" = @arg_0" +
-                "\n\t, t_1.\"Active\" = @arg_1 " +
-                "\nFROM poco t_1 " +
+                "\n\tSET t_1.\"Name\" = @Name" +
+                "\n\t, t_1.\"Active\" = @Active " +
+                "\nFROM poco t_1" +
                 "\nWHERE t_1.\"Active\" <> 0 AND (t_1.\"idPoco\" = @arg_2)", sql.Trim());
             Assert.AreEqual(3, param.Count());
-            Assert.AreEqual("ElNombre", param["arg_0"]);
-            Assert.AreEqual(var, param["arg_1"]);
+            Assert.AreEqual("ElNombre", param["Name"]);
+            Assert.AreEqual(true, param["Active"]);
             Assert.AreEqual(2, param["arg_2"]);
         }
 
         [Test]
-        public void test_QueryBuilder_parser_update()
+        public void Test_QueryBuilder_parser_update()
         {
             var updateItem = new Poco { Id = 3, Name = "Pepe", Active = true };
 
@@ -498,19 +494,125 @@ namespace DeltaX.LinSql.Query.UniTest
             q.Where((t) => t.Active && t.Id == updateItem.Id)
                 .Update(updateItem);
 
-            var stream = q.Parse();
-            var sql = stream.GetSql();
-            var param = stream.GetParameters();
+            (var sql, var param) = q.GetSqlParameters();
 
             Assert.AreEqual("UPDATE t_1" +
-                "\n\tSET t_1.\"Name\" = @arg_0" +
-                "\n\t, t_1.\"Active\" = @arg_1 " +
-                "\nFROM poco t_1 " +
+                "\n\tSET t_1.\"Name\" = @t_1_Name" +
+                "\n\t, t_1.\"Active\" = @t_1_Active " +
+                "\nFROM poco t_1" +
                 "\nWHERE t_1.\"Active\" <> 0 AND (t_1.\"idPoco\" = @arg_2)", sql.Trim());
             Assert.AreEqual(3, param.Count());
-            Assert.AreEqual("Pepe", param["arg_0"]);
-            Assert.AreEqual(true, param["arg_1"]);
+            Assert.AreEqual("Pepe", param["t_1_Name"]);
+            Assert.AreEqual(true, param["t_1_Active"]);
             Assert.AreEqual(3, param["arg_2"]);
+        }
+
+        public string NormalizeString(string src)
+        {
+            return Regex.Replace(src, @"\s+", " ", RegexOptions.Multiline);
+        }
+
+
+        [Test]
+        public void Test_QueryBuilder_parser_update_with_join()
+        { 
+            var q = new QueryBuilder<Poco>()
+                .Join<Poco2>((t1, t2) => t1.Id == t2.Id)
+                .Where((t, t2) => t.Active && t2.Active && t.Id == 2)
+                .Set(t1 => t1.Name, t2 => t2.FullName);
+
+            (var sql, var param) = q.GetSqlParameters();
+            sql = NormalizeString(sql);
+
+            Assert.AreEqual("UPDATE t_1 " +
+                "SET t_1.\"Name\" = t_2.\"FullName\" " +
+                "FROM poco t_1 " +
+                "JOIN poco2 t_2 ON t_1.\"idPoco\" = t_2.\"Id\" " +
+                "WHERE (t_1.\"Active\" <> 0 AND t_2.\"Active\" <> 0) AND (t_1.\"idPoco\" = @arg_0)"
+                , sql.Trim());
+            Assert.AreEqual(1, param.Count());
+            Assert.AreEqual(2, param["arg_0"]); 
+        }
+
+        [Test]
+        public void Test_QueryBuilder_parser_update_with_join_and_constant()
+        {
+            var q = new QueryBuilder<Poco>()
+                .Join<Poco2>((t1, t2) => t1.Id == t2.Id)
+                .Where((t, t2) => t.Active && t2.Active && t.Id == 2)
+                .Set(t1 => t1.Name, t2 => "hola mundo");
+
+            (var sql, var param) = q.GetSqlParameters();
+            sql = NormalizeString(sql);
+
+            Assert.AreEqual("UPDATE t_1 " +
+                "SET t_1.\"Name\" = @Name " +
+                "FROM poco t_1 " +
+                "JOIN poco2 t_2 ON t_1.\"idPoco\" = t_2.\"Id\" " +
+                "WHERE (t_1.\"Active\" <> 0 AND t_2.\"Active\" <> 0) AND (t_1.\"idPoco\" = @arg_1)"
+                , sql.Trim());
+
+            Assert.AreEqual(2, param.Count());
+            Assert.AreEqual("hola mundo", param["Name"]);
+            Assert.AreEqual(2, param["arg_1"]);
+        }
+
+        [Test]
+        public void Test_QueryBuilder_parser_update_with_join_and_expressions()
+        {  
+            var q = new QueryBuilder<Poco>()
+                .Join<Poco2>((t1, t2) => t1.Id == t2.Id + 33)
+                .Where((t, t2) => t.Active && t2.Active && t.Id == 2)
+                .Set(t1 => t1.Name, t2 => "hola mundo" + t2.FullName);
+
+            (var sql, var param) = q.GetSqlParameters();
+            sql = NormalizeString(sql);
+
+            Assert.AreEqual("UPDATE t_1 " +
+                "SET t_1.\"Name\" = @arg_0 + t_2.\"FullName\" " +
+                "FROM poco t_1 " +
+                "JOIN poco2 t_2 ON t_1.\"idPoco\" = (t_2.\"Id\" + @arg_1) " +
+                "WHERE (t_1.\"Active\" <> 0 AND t_2.\"Active\" <> 0) AND (t_1.\"idPoco\" = @arg_2)"
+                , sql.Trim());
+
+            Assert.AreEqual(3, param.Count());
+            Assert.AreEqual("hola mundo", param["arg_0"]);
+            Assert.AreEqual(33, param["arg_1"]);
+            Assert.AreEqual(2, param["arg_2"]);
+        }
+
+
+        [Test]
+        public void test_QueryBuilder_Select_Entity1()
+        {
+            var poco = new Poco { Id = 11, Active = true };
+            var q = new QueryBuilder<Poco>()
+                .Select(poco);
+
+            (var sql, var param) = q.GetSqlParameters();
+            sql = NormalizeString(sql);
+
+            Assert.AreEqual("SELECT t_1.\"idPoco\" as \"Id\" , t_1.\"Name\" , t_1.\"Updated\" , t_1.\"Active\" " +
+                "FROM poco t_1 " +
+                "WHERE t_1.\"idPoco\" = @t_1_Id", sql.Trim());
+            Assert.AreEqual(1, param.Count());
+            Assert.AreEqual(11, param["t_1_Id"]);
+        }
+
+
+        [Test]
+        public void test_QueryBuilder_Select_Entity2()
+        {
+            var q = new QueryBuilder<Poco>().SelectAll().Where(p => p.Id == 101);
+
+            (var sql, var param) = q.GetSqlParameters();
+            sql = NormalizeString(sql);
+
+            Assert.AreEqual("SELECT t_1.\"idPoco\" as \"Id\" , t_1.\"Name\" , t_1.\"Updated\" , t_1.\"Active\" " +
+                "FROM poco t_1 " +
+                "WHERE t_1.\"idPoco\" = @arg_0", sql.Trim());
+            Assert.AreEqual(1, param.Count());
+            Assert.AreEqual(101, param["arg_0"]);
         }
     }
 }

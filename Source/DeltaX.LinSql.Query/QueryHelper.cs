@@ -9,9 +9,14 @@
     public class QueryHelper
     {
         public static object GetValueFromExpression(Expression expression)
-        {
+        { 
             if(expression is LambdaExpression lambda)
             {
+                if (lambda.Body is ConstantExpression constant)
+                {
+                    return constant.Value;
+                }
+
                 return lambda.Compile().DynamicInvoke();
             } 
             return Expression.Lambda(expression).Compile().DynamicInvoke();

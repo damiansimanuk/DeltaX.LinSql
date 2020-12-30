@@ -130,16 +130,13 @@ namespace DeltaX.RepositoryDemo1
             Expression<Func<TEntity, bool>> propertiesCondition)
            where TEntity : class
         {
-            var q = new QueryBuilder<TEntity>()
-                .Where(propertiesCondition);
+            var query = new QueryBuilder<TEntity>()
+               .Where(propertiesCondition) 
+               .GetSqlParameters();
 
-            var stream = q.Parse(queryFactory);
-            var query = stream.GetSql();
-            var param = stream.GetParameters();
+            logger.LogDebug("GetItemsAsync query:{query} param:{@param}", query.sql, query.parameters);
 
-            logger.LogDebug("GetPagedListAsync query:{query} param:{@param}", query, param);
-
-            return db.QueryAsync<TEntity>(query, param);
+            return db.QueryAsync<TEntity>(query.sql, query.parameters);
         }
 
         public Task<int> UpdateAsync<TEntity>(string whereClause, object param, IEnumerable<string> fieldsToSet = null)
@@ -158,7 +155,7 @@ namespace DeltaX.RepositoryDemo1
             logger.LogDebug("UpdateAsync query:{query} entity:{@entity}", query, entity);
 
             return db.ExecuteAsync(query, entity);
-        }
+        } 
 
         public Task<long> GetCountAsync<TEntity>(TEntity entity)
            where TEntity : class

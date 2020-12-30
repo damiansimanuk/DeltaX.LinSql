@@ -12,7 +12,7 @@
     {
         private StringBuilder sql = new StringBuilder();
         private Dictionary<string, object> Parameters = new Dictionary<string, object>();
-        private Dictionary<ITableConfiguration, HashSet<ColumnConfiguration>> tableColumns = new Dictionary<ITableConfiguration, HashSet<ColumnConfiguration>>();
+        //  private Dictionary<ITableConfiguration, HashSet<ColumnConfiguration>> tableColumns = new Dictionary<ITableConfiguration, HashSet<ColumnConfiguration>>();
         private TableQueryFactory tableFactory;
         private int paramGeneratorOffset = 0;
 
@@ -43,10 +43,10 @@
                 });
         }
 
-        public IDictionary<ITableConfiguration, HashSet<ColumnConfiguration>> GetTableColumns()
-        {
-            return tableColumns;
-        }
+        // public IDictionary<ITableConfiguration, HashSet<ColumnConfiguration>> GetTableColumns()
+        // {
+        //     return tableColumns;
+        // }
 
         public string GetSql()
         {
@@ -115,43 +115,32 @@
 
         public void AddIsNullOrEmpty(Type tableType, string columnName, bool not)
         {
-            var table = tableFactory.GetTable(tableType);
-            if (!tableColumns.ContainsKey(table))
-            {
-                tableColumns.Add(table, new HashSet<ColumnConfiguration>());
-            }
-
+            var table = tableFactory.GetTable(tableType); 
             var column = table.Columns.FirstOrDefault(c => c.DtoFieldName == columnName);
             if (column != null)
-            {
-                tableColumns[table].Add(column);
+            { 
                 var property = tableFactory.DialectQuery.Encapsulation(column.DbColumnName, table.Identifier);
                 sql.Append(not ? $"ISNULL({property}, '') <> ''" : $"ISNULL({property}, '') = ''");
             }
         }
 
-        public bool AddColumn(Type tableType, string columnName)
+        public bool AddTableField(Type tableType, string fieldName)
         {
             if (!tableFactory.IsConfiguredTable(tableType))
             {
                 return false;
             }
 
-            var table = tableFactory.GetTable(tableType);
-            if (!tableColumns.ContainsKey(table))
-            {
-                tableColumns.Add(table, new HashSet<ColumnConfiguration>());
-            }
-            var column = table.Columns.FirstOrDefault(c => c.DtoFieldName == columnName);
+            var table = tableFactory.GetTable(tableType); 
+            var column = table.Columns.FirstOrDefault(c => c.DtoFieldName == fieldName);
             if (column != null)
-            {
-                tableColumns[table].Add(column);
+            { 
                 sql.Append(tableFactory.DialectQuery.Encapsulation(column.DbColumnName, table.Identifier));
             }
             return column != null;
         }
 
-        public void AddParameter(object val)
+        public void AddParameter(object val, string argId = null)
         {
             if (val == null)
             {
@@ -159,15 +148,15 @@
                 return;
             }
 
-            var argId = GetNewParameterId();
+            argId ??= GetNewParameterId();
             Parameters.Add(argId, val);
 
             sql.Append($"@{argId}");
         }
 
-        public void AddExpression(Expression val)
+        public void AddExpression(Expression val, string argId = null)
         {
-            var argId = GetNewParameterId();
+            argId ??= GetNewParameterId();
             Parameters.Add(argId, val);
 
             sql.Append($"@{argId}");
@@ -187,14 +176,9 @@
             }
 
             var table = tableFactory.GetTable(tableType);
-            if (!tableColumns.ContainsKey(table))
-            {
-                tableColumns.Add(table, new HashSet<ColumnConfiguration>());
-            }
             var column = table.Columns.FirstOrDefault(c => c.DtoFieldName == columnName);
             if (column != null)
-            {
-                tableColumns[table].Add(column);
+            { 
                 var dbColumn = tableFactory.DialectQuery.GetColumnFormated(column, table.Identifier);
                 sql.Append(sql.Length > 1 ? $", {dbColumn}" : dbColumn);
             }

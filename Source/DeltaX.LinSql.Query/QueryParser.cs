@@ -36,11 +36,6 @@
             return stream.GetParameters();
         }
 
-        public IDictionary<ITableConfiguration, HashSet<ColumnConfiguration>> GetTableColumns()
-        {
-            return stream.GetTableColumns();
-        }
-
         protected ExpressionType? LastOperator()
         {
             if (operators.Any())
@@ -132,7 +127,7 @@
         {
             if (node.Expression.NodeType == ExpressionType.Parameter
                 && stream.IsAllowed(node.Expression.Type)
-                && stream.AddColumn(node.Expression.Type, node.Member.Name))
+                && stream.AddTableField(node.Expression.Type, node.Member.Name))
             {
                 var lastOp = LastOperator();
                 var not = IsNotLastOperator();
@@ -157,14 +152,7 @@
             {
                 stream.AddExpression(node);
                 return node;
-            }
-
-            // // External Variable Value
-            // if (QueryHelper.IsVariable(node.Expression))
-            // {
-            //     stream.AddExpression(node.Expression);
-            //     return node;
-            // }
+            } 
 
             return base.VisitMember(node);
         }
