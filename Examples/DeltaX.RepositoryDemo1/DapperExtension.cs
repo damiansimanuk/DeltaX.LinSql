@@ -123,18 +123,6 @@ namespace DeltaX.RepositoryDemo1
 
             var result = db.ExecuteAsync(sql, param).Result;
         }
-
-        public static void ExampleInsert()
-        {
-            IDbConnection db = null;
-
-            Poco entity = new Poco { Active = true, Name = "Pepe" };
-
-            (var sql, var param) = new QueryBuilder<Poco>()
-                .Select
-                .GetSqlParameters();
-
-            var result = db.ExecuteAsync(sql, param).Result;
-        }
+ 
     }
 }
