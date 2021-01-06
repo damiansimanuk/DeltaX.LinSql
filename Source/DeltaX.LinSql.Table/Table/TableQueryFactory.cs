@@ -15,7 +15,7 @@
             instance = this;
         }
 
-        public TableQueryFactory(Dialect dialect) : this(new DialectQuery(dialect))
+        public TableQueryFactory(DialectType dialect) : this(new DialectQuery(dialect))
         {
         }
 
@@ -23,7 +23,7 @@
 
         public static TableQueryFactory GetInstance()
         {
-            return instance ??= new TableQueryFactory(Dialect.SQLite);
+            return instance ??= new TableQueryFactory(DialectType.SQLite);
         }
 
         public DialectQuery DialectQuery { get; private set; }
@@ -55,19 +55,19 @@
             return tablesConfig;
         }
 
-        public void ConfigureTable<TTable>(string tableName, Action<TableConfiguration<TTable>> configTable)
+        public void ConfigureTable<TTable>(string tableName, Action<ITableConfiguration<TTable>> configTable)
             where TTable : class
         {
             ConfigureTable(null, tableName, null, configTable);
         }
 
-        public void ConfigureTable<TTable>(string schema, string tableName, Action<TableConfiguration<TTable>> configTable)
+        public void ConfigureTable<TTable>(string schema, string tableName, Action<ITableConfiguration<TTable>> configTable)
             where TTable : class
         {
             ConfigureTable(schema, tableName, null, configTable);
         }
 
-        public void ConfigureTable<TTable>(string schema, string tableName, string identifier, Action<TableConfiguration<TTable>> configTable)
+        public void ConfigureTable<TTable>(string schema, string tableName, string identifier, Action<ITableConfiguration<TTable>> configTable)
            where TTable : class
         {
             var table = new TableConfiguration<TTable>(tableName, schema, identifier);

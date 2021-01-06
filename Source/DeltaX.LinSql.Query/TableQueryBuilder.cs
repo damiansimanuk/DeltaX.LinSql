@@ -16,9 +16,8 @@
         public bool IsSetValue { get; private set; }
         public object TableUpdate { get; private set; }
         public object TableDeleteEntity { get; private set; }
-        public Type TableDeleteType { get; private set; }
-        public object TableSelectEntity { get; private set; }
-        public Type TableSelectType { get; private set; }
+        public Type TableDeleteType { get; private set; } 
+        public Dictionary<Type, object> TableSelect  { get; private set; }
         // public HashSet<object> TablesSelect { get; private set; }
 
 
@@ -29,7 +28,7 @@
             ExpressionSelect = new List<Expression>();
             ExpressionJoin = new Dictionary<Type, Expression>();
             ExpressionSet = new Dictionary<Type, List<(Expression, object)>>();
-            // TablesSelect = new HashSet<object>(); 
+            TableSelect = new Dictionary<Type, object>();
         }
 
         public IEnumerable<Type> GetTables()
@@ -72,13 +71,12 @@
             ExpressionSelect.Add(properties);
         }
 
-        internal void SelectEntity<T>(T entity = null) where T : class
+        internal void SelectEntity(Type entityType, object entity = null)
         {
             AssertException(TableDeleteType == null, "Can't select element with delete statement!");
-            GetTable(typeof(T));
+            GetTable(entityType);
 
-            TableSelectType = typeof(T);
-            TableSelectEntity = entity;
+            TableSelect[entityType]= entity;
         }
 
         internal void Join<T>(Expression properties)

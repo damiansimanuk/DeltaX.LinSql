@@ -57,9 +57,9 @@
                 return ParseUpdateSet(tableFactory, stream);
             }
             // SELECT
-            else if (Builder.TableSelectType!=null)
+            else if (Builder.TableSelect.Any())
             { 
-                return ParseSelect(tableFactory, stream, Builder.TableSelectType, Builder.TableSelectEntity);
+                return ParseSelect(tableFactory, stream, Builder.TableSelect);
             }
             // SELECT
             else
@@ -68,35 +68,39 @@
             }
         }
 
-        private QueryStream ParseDelete(TableQueryFactory tableFactory, QueryStream stream, Type tableType, object entity)
+        private QueryStream ParseDelete(TableQueryFactory tableFactory, QueryStream stream, Type entityType, object entity)
         {
-            var tableDelete = tableFactory.GetTable(tableType);
-
-            stream.AddSql($"DELETE {tableDelete.Identifier}");
+            var table = tableFactory.GetTable(entityType);
+            stream.AddSql($"DELETE {table.Identifier}");
 
             ParseFrom(tableFactory, stream);
             // JOIN
             ParseJoin(tableFactory, stream);
             // WHERE
-            int whereAdded = ParseWhere(stream);
-            if (whereAdded == 0 && entity != null)
-            {
-                stream.AddSql("\nWHERE ");
-                var pks = tableDelete.GetPrimaryKeysColumn();
-                foreach (var pk in pks)
-                {
-                    stream.AddTableField(tableType, pk.DtoFieldName);
-                    stream.AddOperator("=");
-                    stream.AddParameter(pk.GetPropertyInfo().GetValue(entity), $"{tableDelete.Identifier}_{pk.DtoFieldName}");
-                }
-            }
+            ParseWhere(tableFactory, stream, entityType, entity);
+             
+            return stream;
+        }
+
+        private QueryStream ParseInsert(TableQueryFactory tableFactory, QueryStream stream, Type entityType, object entity)
+        {
+            var table = tableFactory.GetTable(entityType);
+
+            var columns = tableFactory.DialectQuery.GetInsertColumns(table);
+            stream.AddSql($"DELETE {table.Identifier}");
+
+            ParseFrom(tableFactory, stream);
+            // JOIN
+            ParseJoin(tableFactory, stream);
+            // WHERE
+            ParseWhere(tableFactory, stream, entityType, entity);
 
             return stream;
         }
-        
-        private QueryStream ParseUpdate(TableQueryFactory tableFactory, QueryStream stream, Type tableType, object entity)
+
+        private QueryStream ParseUpdate(TableQueryFactory tableFactory, QueryStream stream, Type entityType, object entity)
         { 
-            var tableUpdate = tableFactory.GetTable(tableType);
+            var tableUpdate = tableFactory.GetTable(entityType);
             stream.AddSql($"UPDATE {tableUpdate.Identifier}");
 
             var first = true;
@@ -113,18 +117,7 @@
             // JOIN
             ParseJoin(tableFactory, stream);
             // WHERE 
-            int whereAdded = ParseWhere(stream);
-            if (whereAdded == 0)
-            {
-                stream.AddSql("\nWHERE ");
-                var pks = tableUpdate.GetPrimaryKeysColumn();
-                foreach (var pk in pks)
-                {
-                    stream.AddTableField(tableType, pk.DtoFieldName);
-                    stream.AddOperator("=");
-                    stream.AddParameter(pk.GetPropertyInfo().GetValue(entity), $"{tableUpdate.Identifier}_{pk.DtoFieldName}");
-                }
-            }
+            ParseWhere(tableFactory, stream, entityType, entity);
 
             return stream;
         }
@@ -137,40 +130,43 @@
             stream.AddSql($"UPDATE {string.Join(", ", identifiers)}");
 
             var first = true;
-            foreach (var value in Builder.ExpressionSet.SelectMany(s => s.Value))
+            foreach (var pair in Builder.ExpressionSet)
             {
-
-                var member = QueryHelper.GetFirstMemberExpression(value.property, allowedTables) as MemberExpression;
-                if (member != null)
+                var table = tableFactory.GetTable(pair.Key);
+                foreach (var value in pair.Value)
                 {
-                    stream.AddSql(first ? "\n\tSET " : "\n\t, ");
-                    var fieldName = member.Member.Name;
-                    stream.AddTableField(member.Expression.Type, fieldName);
-                    stream.AddOperator("=");
-
-                    if (value.value is Expression valExpr)
+                    var member = QueryHelper.GetFirstMemberExpression(value.property, allowedTables) as MemberExpression;
+                    if (member != null)
                     {
-                        var valueMember = QueryHelper.GetFirstMemberExpression(valExpr, allowedTables) as MemberExpression;
-                        if (valueMember != null && valExpr is LambdaExpression lambdaExpression && lambdaExpression.Body.NodeType == ExpressionType.MemberAccess)
+                        stream.AddSql(first ? "\n\tSET " : "\n\t, ");
+                        var fieldName = member.Member.Name;
+                        stream.AddTableField(member.Expression.Type, fieldName);
+                        stream.AddOperator("=");
+
+                        if (value.value is Expression valExpr)
                         {
-                            stream.AddTableField(valueMember.Expression.Type, valueMember.Member.Name);
-                        }
-                        else if (valueMember != null && valueMember.NodeType != ExpressionType.Parameter)
-                        {
-                            var qp = new QueryParser(stream);
-                            qp.Visit(valExpr);
+                            var valueMember = QueryHelper.GetFirstMemberExpression(valExpr, allowedTables) as MemberExpression;
+                            if (valueMember != null && valExpr is LambdaExpression lambdaExpression && lambdaExpression.Body.NodeType == ExpressionType.MemberAccess)
+                            {
+                                stream.AddTableField(valueMember.Expression.Type, valueMember.Member.Name);
+                            }
+                            else if (valueMember != null && valueMember.NodeType != ExpressionType.Parameter)
+                            {
+                                var qp = new QueryParser(stream);
+                                qp.Visit(valExpr);
+                            }
+                            else
+                            {
+                                stream.AddParameter(value.value, $"{table.Identifier}_{fieldName}");
+                            }
                         }
                         else
                         {
-                            stream.AddParameter(value.value, fieldName);
+                            stream.AddParameter(value.value, $"{table.Identifier}_{fieldName}");
                         }
-                    }
-                    else
-                    {
-                        stream.AddParameter(value.value, fieldName);
-                    }
 
-                    first = false;
+                        first = false;
+                    }
                 }
             }
 
@@ -179,7 +175,7 @@
             // JOIN
             ParseJoin(tableFactory, stream);
             // WHERE 
-            ParseWhere(stream); 
+            ParseWhere(tableFactory, stream); 
 
             return stream;
         }
@@ -194,54 +190,32 @@
 
                 var s = new SelectParser(expression);
                 stream.AddSql(s.GetSql());
-            }
-            // // SELECT ALL
-            // if (!selecAdded)
-            // {
-            //     stream.AddSql("SELECT ");
-            //     var tablesColumnsSelect = Builder.GetTables()
-            //         .Select(t => tableFactory.GetTable(t))
-            //         .Select(t => tableFactory.DialectQuery.GetSelectColumns(t, t.Identifier));
-            // 
-            //     stream.AddSql(string.Join("\n\t, ", tablesColumnsSelect));
-            // }
+            } 
 
             ParseFrom(tableFactory, stream);
             // JOIN
             ParseJoin(tableFactory, stream);
             // WHERE
-            ParseWhere(stream);
+            ParseWhere(tableFactory, stream);
 
             return stream;
         }
 
-        private QueryStream ParseSelect(TableQueryFactory tableFactory, QueryStream stream, Type entityType, object entity)
-        {  
-            var tableSelect = tableFactory.GetTable(entityType);
-
+        private QueryStream ParseSelect(TableQueryFactory tableFactory, QueryStream stream, Dictionary<Type, object>  entities)
+        {   
             // SELECT
             stream.AddSql("SELECT ");
-            var tablesColumnsSelect = tableFactory.DialectQuery.GetSelectColumns(tableSelect, tableSelect.Identifier);
-            stream.AddSql($"\n\t{tablesColumnsSelect}");
+            var tablesColumnsSelect = entities
+                .Select(t => new { table = tableFactory.GetTable(t.Key), entity = t.Value })
+                .Select(t => tableFactory.DialectQuery.GetSelectColumns(t.table, t.table.Identifier));
+            stream.AddSql($"\n\t{string.Join("\n\t, ", tablesColumnsSelect)}");
 
             // FROM
             ParseFrom(tableFactory, stream);
             // JOIN
             ParseJoin(tableFactory, stream);
             // WHERE
-            int whereAdded = ParseWhere(stream);
-            if (whereAdded == 0 && entity != null)
-            {
-                stream.AddSql("\nWHERE ");
-                var pks = tableSelect.GetPrimaryKeysColumn();
-                foreach (var pk in pks)
-                {
-                    stream.AddTableField(entityType, pk.DtoFieldName);
-                    stream.AddOperator("=");
-                    stream.AddParameter(pk.GetPropertyInfo().GetValue(entity), $"{tableSelect.Identifier}_{pk.DtoFieldName}");
-                    whereAdded++;
-                }
-            }
+            ParseWhere(tableFactory, stream, entities.Keys.First(), entities.Values.First()); 
 
             return stream;
         }
@@ -268,19 +242,33 @@
             return Builder.ExpressionJoin.Count();
         }
 
-        private int ParseWhere(QueryStream stream)
+        private int ParseWhere(TableQueryFactory tableFactory, QueryStream stream, Type entityType = null, object entity = null)
         {
-            bool whereAdded = false;
+            int whereAdded = 0;
             foreach (var expression in Builder.ExpressionWhere)
             {
-                stream.AddSql(whereAdded ? "\n\tAND " : "\nWHERE ");
-                whereAdded = true;
+                stream.AddSql(whereAdded > 0 ? "\n\tAND " : "\nWHERE ");
 
                 var qp = new QueryParser(stream);
                 qp.Visit(expression);
+                whereAdded++;
             }
 
-            return Builder.ExpressionWhere.Count();
+            if (whereAdded == 0 && entityType != null && entity != null)
+            {
+                var table = tableFactory.GetTable(entityType);
+                stream.AddSql("\nWHERE ");
+                var pks = table.GetPrimaryKeysColumn();
+                foreach (var pk in pks)
+                {
+                    stream.AddTableField(entityType, pk.DtoFieldName);
+                    stream.AddOperator("=");
+                    stream.AddParameter(pk.GetPropertyInfo().GetValue(entity), $"{table.Identifier}_{pk.DtoFieldName}");
+                    whereAdded++;
+                }
+            }
+
+            return whereAdded;
         }
 
 
@@ -307,15 +295,16 @@
             return this;
         }
 
-        public IQueryBuilder<T1> Select(T1 entity)
+        public IQueryBuilder<T1> Select<TEntity>(TEntity entity = null) 
+            where TEntity : class
         {
-            Builder.SelectEntity<T1>(entity);
+            Builder.SelectEntity(typeof(TEntity), entity);
             return this;
-        } 
+        }
 
         public IQueryBuilder<T1> SelectAll()
         {
-            Builder.SelectEntity<T1>(null);
+            Builder.SelectEntity(typeof(T1), null);
             return this;
         }
 
@@ -371,6 +360,14 @@
         {
             Builder.Select(properties);
             return this;
+        } 
+        
+
+        public new IQueryBuilder<T1, T2> SelectAll()
+        {
+            Builder.SelectEntity(typeof(T1), null);
+            Builder.SelectEntity(typeof(T2), null);
+            return this;
         }
 
         public IQueryBuilder<T1, T2> Where(Expression<Func<T1, T2, bool>> properties)
@@ -408,7 +405,15 @@
         {
             Builder.Select(properties);
             return this;
-        }
+        } 
+
+        public new IQueryBuilder<T1, T2, T3> SelectAll()
+        {
+            Builder.SelectEntity(typeof(T1), null);
+            Builder.SelectEntity(typeof(T2), null);
+            Builder.SelectEntity(typeof(T3), null);
+            return this;
+        } 
 
         public IQueryBuilder<T1, T2, T3> Set<P>(Expression<Func<T1, P>> property, Expression<Func<T2, T3, P>> value)
         {
@@ -440,6 +445,15 @@
             return this;
         }
 
+        public new IQueryBuilder<T1, T2, T3, T4> SelectAll()
+        {
+            Builder.SelectEntity(typeof(T1), null);
+            Builder.SelectEntity(typeof(T2), null);
+            Builder.SelectEntity(typeof(T3), null);
+            Builder.SelectEntity(typeof(T4), null);
+            return this;
+        }
+
         public IQueryBuilder<T1, T2, T3, T4> Set<P>(Expression<Func<T1, P>> property, Expression<Func<T2, T3, T4, P>> value)
         {
             Builder.Set<T1>(property, value);
@@ -451,6 +465,6 @@
             Builder.Where(properties);
             return this;
         }
-    }
+    } 
 }
 

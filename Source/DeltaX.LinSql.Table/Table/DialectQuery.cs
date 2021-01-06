@@ -4,14 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public enum Dialect
-    {
-        SQLServer,
-        PostgreSQL,
-        SQLite,
-        MySQL,
-    }
-
     public class DialectQuery
     {
         public string EncapsulationSql { get; private set; }
@@ -22,22 +14,22 @@
         public string DeleteQueryFormatSql { get; private set; }
         public string UpdateQueryFormatSql { get; private set; }
         public string CountQueryFormatSql { get; private set; }
-        public Dialect Dialect { get; private set; }
+        public DialectType Dialect { get; private set; }
 
-        public DialectQuery(Dialect dialect)
+        public DialectQuery(DialectType dialect)
         {
             DefaultInitialization();
             Dialect = dialect;
 
             switch (dialect)
             {
-                case Dialect.PostgreSQL:
+                case DialectType.PostgreSQL:
                     IdentityQueryFormatSql = "SELECT LASTVAL() AS id";
                     break;
-                case Dialect.SQLite:
+                case DialectType.SQLite:
                     IdentityQueryFormatSql = "SELECT LAST_INSERT_ROWID() AS id";
                     break;
-                case Dialect.MySQL:
+                case DialectType.MySQL:
                     EncapsulationSql = "`{0}`";
                     IdentityQueryFormatSql = "SELECT LAST_INSERT_ID() AS id";
                     PagedListQueryFormatSql = "SELECT \n" +
@@ -47,7 +39,7 @@
                         "{OrderByClause} \n" +
                         "LIMIT {SkipCount},{RowsPerPage} ";
                     break;
-                case Dialect.SQLServer:
+                case DialectType.SQLServer:
                     EncapsulationSql = "[{0}]";
                     IdentityQueryFormatSql = "SELECT SCOPE_IDENTITY() AS [id]";
                     PagedListQueryFormatSql = "SELECT \n" +

@@ -22,6 +22,7 @@ namespace DeltaX.LinSql.Query
         IQueryBuilder<T1> Delete(T1 entity = null);
         IQueryBuilder<T1, T2> Join<T2>(Expression<Func<T1, T2, bool>> joinOn) where T2 : class;
         IQueryBuilder<T1> Select(Expression<Func<T1, object>> properties);
+        IQueryBuilder<T1> Select<TEntity>(TEntity entity = null) where TEntity : class;
         IQueryBuilder<T1> SelectAll();
         IQueryBuilder<T1> Set<P>(Expression<Func<T1, P>> property, P value);
         IQueryBuilder<T1> Set<P>(Expression<Func<T1, P>> property, Expression<Func<P>> value);
@@ -34,7 +35,8 @@ namespace DeltaX.LinSql.Query
         where T2 : class
     {
         IQueryBuilder<T1, T2, T3> Join<T3>(Expression<Func<T1, T2, T3, bool>> joinOn) where T3: class;
-        IQueryBuilder<T1, T2> Select(Expression<Func<T1, T2, object>> properties);
+        IQueryBuilder<T1, T2> Select(Expression<Func<T1, T2, object>> properties); 
+        new IQueryBuilder<T1, T2> SelectAll();
         IQueryBuilder<T1, T2> Set<P>(Expression<Func<T1, P>> property, Expression<Func<T2, P>> value);
         IQueryBuilder<T1, T2> Where(Expression<Func<T1, T2, bool>> properties);
     }
@@ -46,7 +48,8 @@ namespace DeltaX.LinSql.Query
     {
 
         IQueryBuilder<T1, T2, T3, T4> Join<T4>(Expression<Func<T1, T2, T3, T4, bool>> joinOn) where T4 : class;
-        IQueryBuilder<T1, T2, T3> Select(Expression<Func<T1, T2, T3, object>> properties);
+        IQueryBuilder<T1, T2, T3> Select(Expression<Func<T1, T2, T3, object>> properties); 
+        new IQueryBuilder<T1, T2, T3> SelectAll();
         IQueryBuilder<T1, T2, T3> Set<P>(Expression<Func<T1, P>> property, Expression<Func<T2, T3, P>> value);
         IQueryBuilder<T1, T2, T3> Where(Expression<Func<T1, T2, T3, bool>> properties);
     }
@@ -57,7 +60,8 @@ namespace DeltaX.LinSql.Query
         where T3 : class
         where T4 : class
     {
-        IQueryBuilder<T1, T2, T3, T4> Select(Expression<Func<T1, T2, T3, T4, object>> properties);
+        IQueryBuilder<T1, T2, T3, T4> Select(Expression<Func<T1, T2, T3, T4, object>> properties); 
+        new IQueryBuilder<T1, T2, T3, T4> SelectAll();
         IQueryBuilder<T1, T2, T3, T4> Set<P>(Expression<Func<T1, P>> property, Expression<Func<T2, T3, T4, P>> value);
         IQueryBuilder<T1, T2, T3, T4> Where(Expression<Func<T1, T2, T3, T4, bool>> properties);
     }

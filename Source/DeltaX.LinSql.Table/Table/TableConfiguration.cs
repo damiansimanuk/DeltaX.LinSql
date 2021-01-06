@@ -6,33 +6,9 @@
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Reflection; 
+    using System.Reflection;
 
-    public interface ITableConfiguration
-    {
-        public string Name { get; }
-        public string Schema { get; }
-        public string Identifier { get; }
-        public IEnumerable<ColumnConfiguration> Columns { get; }
-        public ColumnConfiguration GetIdentityColumn();
-        public IEnumerable<ColumnConfiguration> GetPrimaryKeysColumn();
-        public IEnumerable<ColumnConfiguration> GetSelectColumns();
-        public IEnumerable<ColumnConfiguration> GetSelectColumnsList();
-        public IEnumerable<ColumnConfiguration> GetInsertColumns();
-        public IEnumerable<ColumnConfiguration> GetUpdateColumns();
-    }
-
-    class TableConfigurationIdentifierCreator
-    {
-        private static int identifierCount = 1;
-
-        public static string GetIdentifier()
-        {
-            return $"t_{identifierCount++}";
-        }
-    }
-
-    public class TableConfiguration<TTable> : ITableConfiguration
+    public class TableConfiguration<TTable> : ITableConfiguration<TTable>
         where TTable : class
     {
 
