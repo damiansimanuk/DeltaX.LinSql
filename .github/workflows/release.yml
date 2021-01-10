@@ -22,10 +22,17 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal 
-    - name: Dotnet Pack 
-      working-directory: Source/DeltaX.CacheObservable
+    - name: Dotnet Pack LinSql.Table
+      working-directory: Source/DeltaX.LinSql.Table
       run: dotnet pack -c Release -p:Version=${GITHUB_REF##*/v}
-    - name: Dotnet Nuget Push   
-      working-directory: Source/DeltaX.CacheObservable/bin/Release
-      run: dotnet nuget push DeltaX_CacheObservable.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
+    - name: Dotnet Pack LinSql.Query
+      working-directory: Source/DeltaX.LinSql.Query
+      run: dotnet pack -c Release -p:Version=${GITHUB_REF##*/v}
+    - name: Dotnet Nuget Push LinSql.Table
+      working-directory: Source/DeltaX.LinSql.Table/bin/Release
+      run: dotnet nuget push DeltaX_LinSql_Table.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
+      continue-on-error: true
+    - name: Dotnet Nuget Push LinSql.Query
+      working-directory: Source/DeltaX.LinSql.Query/bin/Release
+      run: dotnet nuget push DeltaX_LinSql_Query.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
       continue-on-error: true
