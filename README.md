@@ -1,12 +1,15 @@
 # DeltaX.LinSql
 
 ## Description
-This repo is simple **SQL** query generator using **Poco** class. The Poco can be configured using Attributes or not.
+This repo is simple **C#** **SQL** query generator using **Poco**/**Dto** classes. The classes can be configured using Attributes or not.
 
-Use `TableQueryFactory` for configure all **Poco** class.
+This repo include two Projects. The first one (DeltaX.LinSql.Table) maps each configured classes to a sql table and provides a stack of individual queries per table (insert, delete, update, read). The second (DeltaX.LinSql.Query) provide lambda expresion queries and relations between tables (join, delete, update, read) for easy query generation.
 
-Use `QueryBuilder` for easy queries using Lambda Expression.
+- Use `TableQueryFactory` for configure all **Poco** class.
+- Use `TableQueryFactory` for singles queries by entity.
+- Use `QueryBuilder` for easy queries using Lambda Expression on singles queries and relational queries.
 
+The `TableQueryFactory` can be configured using one of these dialects: `SQLServer`, `PostgreSQL`, `SQLite` or `MySQL`.
  
 ## Example configure Poco Class to SQL table
 
@@ -122,7 +125,12 @@ IEnumerable<Poco> result = db.QueryAsync<Poco>(sql, param).Result;
 
 
 **NOTE:** please, see `DeltaX.LinSql.Query.UniTest` project for all uses case.
- 
+
+## Test
+
+All uses case are tested
+![imagen](https://user-images.githubusercontent.com/2318691/104198177-ac2a7c80-5404-11eb-84d4-10a5ae033623.png)
+
 
 ## Install 
 
