@@ -10,6 +10,11 @@ This repo include two Projects. The first one (DeltaX.LinSql.Table) maps each co
 - Use `QueryBuilder` for easy queries using Lambda Expression on singles queries and relational queries.
 
 The `TableQueryFactory` can be configured using one of these dialects: `SQLServer`, `PostgreSQL`, `SQLite` or `MySQL`.
+
+This repo is also configured with **github Actions**
+
+- Compile and Test for each commit
+- **Publish** on **nuget.org** for each manual release
  
 ## Example configure Poco Class to SQL table
 
