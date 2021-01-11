@@ -15,16 +15,16 @@ Browser Swagger Specification
 
 ### Project Detail
 
-- Folder Controller: Contain UserController. This is Entry point of Rest Api and also swagger (OpenApi) definitions.
+- Folder **Controllers**: Contain UserController. This is Entry point of Rest Api and also swagger (OpenApi) definitions.
 
-- Folder Dtos: Contain all Poco/Dto classes used for entities (User, Role and UsersRoles) and helpers Poco classes (CreateUser, UpdateUser, CreateUsersRoles and RemoveUsersRoles)
+- Folder **Dtos**: Contain all Poco/Dto classes used for entities (User, Role and UsersRoles) and helpers Poco classes (CreateUser, UpdateUser, CreateUsersRoles and RemoveUsersRoles)
 
-- Folder Repository: Contain UserRepository when interface is it: 
+- Folder **Repository**: Contain UserRepository when interface is it: 
 
 <img src="https://user-images.githubusercontent.com/2318691/104245629-5cb77100-5443-11eb-84c4-f311e04b1d7d.png" height="200"/>
 
-- Folder SqliteHelper: Contain DapperSqlite helper for DateTimeOffset mapper. Sql query for create Tables Users, Roles and UsersRoles. Configuration mapper between Sql Tables and Dtos.
+- Folder **SqliteHelper**: Contain DapperSqlite helper for DateTimeOffset mapper. Sql query for create Tables Users, Roles and UsersRoles. Configuration mapper between Sql Tables and Dtos.
 
-- Startup.cs: Contain classics Configuration and escentialy Dependency Injection configuration 
+- File **Startup.cs**: Contain classics Configuration and escentialy Dependency Injection configuration 
 
 
