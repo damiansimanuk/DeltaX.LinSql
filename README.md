@@ -16,6 +16,7 @@ This repo is also configured with **github Actions**
 - Compile and Test for each commit
 - **Publish** on **nuget.org** for each manual release
  
+**NOTE:** See Full Sample DeltaX.RestApiDemo1 https://github.com/damiansimanuk/DeltaX.LinSql/tree/main/Examples 
 ## Example configure Poco Class to SQL table
 
 This sample configure columns:
