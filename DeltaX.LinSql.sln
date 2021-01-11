@@ -17,7 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaX.LinSql.Table.UniTest
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{C03F312C-F808-42A6-8114-09639F7DC2EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeltaX.RepositoryDemo1", "Examples\DeltaX.RepositoryDemo1\DeltaX.RepositoryDemo1.csproj", "{7B5712E5-623F-4ABE-A2D6-0B3A0E16B702}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaX.RepositoryDemo1", "Examples\DeltaX.RepositoryDemo1\DeltaX.RepositoryDemo1.csproj", "{7B5712E5-623F-4ABE-A2D6-0B3A0E16B702}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeltaX.RestApiDemo1", "Examples\DeltaX.RestApiDemo1\DeltaX.RestApiDemo1.csproj", "{E2CEF200-D86C-4316-BCE1-4F3C4E783C7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{7B5712E5-623F-4ABE-A2D6-0B3A0E16B702}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B5712E5-623F-4ABE-A2D6-0B3A0E16B702}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B5712E5-623F-4ABE-A2D6-0B3A0E16B702}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2CEF200-D86C-4316-BCE1-4F3C4E783C7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2CEF200-D86C-4316-BCE1-4F3C4E783C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2CEF200-D86C-4316-BCE1-4F3C4E783C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2CEF200-D86C-4316-BCE1-4F3C4E783C7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +61,7 @@ Global
 		{17576479-4912-4C03-B444-9C952E3E7FFD} = {A32765A7-C0E2-401E-909B-3C28153CA7FE}
 		{9844DB8E-3F13-4D92-9C58-10B290D402CA} = {A32765A7-C0E2-401E-909B-3C28153CA7FE}
 		{7B5712E5-623F-4ABE-A2D6-0B3A0E16B702} = {C03F312C-F808-42A6-8114-09639F7DC2EF}
+		{E2CEF200-D86C-4316-BCE1-4F3C4E783C7E} = {C03F312C-F808-42A6-8114-09639F7DC2EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {007EB995-E04C-47B4-9A0B-8040DCA6CF10}
