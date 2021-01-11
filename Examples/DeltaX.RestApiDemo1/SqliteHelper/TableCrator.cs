@@ -1,13 +1,10 @@
-﻿using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace DeltaX.RestApiDemo1.Repository
+﻿
+namespace DeltaX.RestApiDemo1.SqliteHelper
 {
+	using Microsoft.Data.Sqlite;
+	using Microsoft.Extensions.Logging;
+	using System.Data;
+
 	public class TableCrator
 	{
 		public static readonly string ScriptCreateTables = @"
@@ -19,6 +16,7 @@ CREATE TABLE IF NOT EXISTS Users(
     Username     TEXT    UNIQUE NOT NULL,
     FullName     TEXT,
     Email        TEXT    UNIQUE, 
+	Image        BLOB,
     Active       BOOLEAN DEFAULT (1) NOT NULL,
     PasswordHash TEXT,
     CreatedAt    DATE    DEFAULT (datetime('now', 'localtime') ) 
@@ -33,10 +31,10 @@ CREATE TABLE IF NOT EXISTS Roles (
 CREATE TABLE IF NOT EXISTS UsersRoles (
     UserId		INTEGER REFERENCES Users (Id) ON DELETE CASCADE,
     RolId		INTEGER REFERENCES Roles (Id) ON DELETE CASCADE,
-    Create		BOOLEAN DEFAULT (0),
-    Read		BOOLEAN DEFAULT (1),
-    Update		BOOLEAN DEFAULT (0),
-    Delete		BOOLEAN DEFAULT (0),
+    C			BOOLEAN DEFAULT (0),
+    R			BOOLEAN DEFAULT (1),
+    U			BOOLEAN DEFAULT (0),
+    D			BOOLEAN DEFAULT (0),
     CreatedAt DATE    DEFAULT (datetime('now', 'localtime') ),
     UNIQUE (UserId, RolId)
 );

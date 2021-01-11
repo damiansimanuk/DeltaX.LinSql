@@ -100,13 +100,13 @@
 
         private QueryStream ParseUpdate(TableQueryFactory tableFactory, QueryStream stream, Type entityType, object entity)
         { 
-            var tableUpdate = tableFactory.GetTable(entityType);
-            stream.AddSql($"UPDATE {tableUpdate.Identifier}");
+            var tableUpdate = tableFactory.GetTable(entityType); 
+            stream.AddSql($"UPDATE {tableFactory.DialectQuery.GetTableName(tableUpdate)}");
 
             var first = true;
             foreach (var col in tableUpdate.GetUpdateColumns())
             {
-                var colName = tableFactory.DialectQuery.Encapsulation(col.DbColumnName, tableUpdate.Identifier);
+                var colName = tableFactory.DialectQuery.Encapsulation(col.DbColumnName, null);
                 stream.AddSql(first ? $"\n\tSET {colName} = " : $"\n\t, {colName} = ");
                 stream.AddParameter(col.GetPropertyInfo().GetValue(entity), $"{tableUpdate.Identifier}_{col.DtoFieldName}");
                 first = false;

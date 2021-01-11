@@ -124,18 +124,18 @@
             }
         }
 
-        public bool AddTableField(Type tableType, string fieldName)
+        public bool AddTableField(Type tableType, string fieldName, string identifier = null)
         {
             if (!tableFactory.IsConfiguredTable(tableType))
             {
                 return false;
             }
 
-            var table = tableFactory.GetTable(tableType); 
+            var table = tableFactory.GetTable(tableType);
             var column = table.Columns.FirstOrDefault(c => c.DtoFieldName == fieldName);
             if (column != null)
-            { 
-                sql.Append(tableFactory.DialectQuery.Encapsulation(column.DbColumnName, table.Identifier));
+            {
+                sql.Append(tableFactory.DialectQuery.Encapsulation(column.DbColumnName, identifier ?? table.Identifier));
             }
             return column != null;
         }

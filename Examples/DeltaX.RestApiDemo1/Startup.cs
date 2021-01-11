@@ -1,18 +1,18 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace DeltaX.RestApiDemo1
 {
+    using DeltaX.LinSql.Table;
+    using DeltaX.RestApiDemo1.Repository;
+    using DeltaX.RestApiDemo1.SqliteHelper;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Data.Sqlite;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.OpenApi.Models;
+    using System.Data;
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -22,9 +22,19 @@ namespace DeltaX.RestApiDemo1
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var connectionString = Configuration.GetConnectionString("RestApiDemo");
+
+            DapperSqliteTypeHandler.SetSqliteTypeHandler();
+            services.AddSingleton<TableQueryFactory>(s => new TableQueryFactory(DialectType.SQLite));
+            services.AddTransient<IDbConnection, SqliteConnection>(s =>
+            {
+                var db = new SqliteConnection(connectionString);
+                db.Open();
+                return db;
+            });
+            services.AddTransient<IUserRepository, UserRepository>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -33,9 +43,11 @@ namespace DeltaX.RestApiDemo1
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            CreateTable(app, env);
+            ConfigureTable(app, env);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -51,6 +63,22 @@ namespace DeltaX.RestApiDemo1
             {
                 endpoints.MapControllers();
             });
+        }
+
+        public void CreateTable(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            // Create todo schema
+            var connection = app.ApplicationServices.GetService<IDbConnection>();
+            var logger = app.ApplicationServices.GetService<ILogger>();
+            var tableCrator = new TableCrator(connection, logger);
+            tableCrator.Start();
+        }
+        
+        public void ConfigureTable(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            // Create todo schema
+            var queryFactory = app.ApplicationServices.GetService<TableQueryFactory>();
+            ConfigureTables.Configure(queryFactory);
         }
     }
 }
