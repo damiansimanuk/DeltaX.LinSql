@@ -24,7 +24,7 @@ This sample configure columns:
  - FullName as read/write field (called UserFullName on sql table) 
  - Update as read only field
  - Active as read/write field
-```
+``` C#
 var queryFactory = TableQueryFactory.GetInstance(); 
 if (!queryFactory.IsConfiguredTable<User>())
 {
@@ -44,7 +44,7 @@ These examples are usefull on Repository patter, see: Example: `DapperRepository
 
 ### Insert Entity and read identity primary key
 
-```
+``` C#
 public Task<Tkey> InsertAsync<TEntity, Tkey>(TEntity item, IEnumerable<string> fieldsToInsert = null)
     where TEntity : class
 {
@@ -55,7 +55,7 @@ public Task<Tkey> InsertAsync<TEntity, Tkey>(TEntity item, IEnumerable<string> f
 ```
 
 ### Delete Entity
-```
+``` C#
 public Task DeleteAsync<TEntity>(TEntity entity)
     where TEntity : class
 {
@@ -65,7 +65,7 @@ public Task DeleteAsync<TEntity>(TEntity entity)
 ```
 
 ### Get Entity
-```
+``` C#
 public Task<TEntity> GetAsync<TEntity>(string whereClause, object param)
             where TEntity : class
 {
@@ -75,13 +75,13 @@ public Task<TEntity> GetAsync<TEntity>(string whereClause, object param)
 ```
 
 ### Get GetPagedList Entity
-```
+``` C#
 var query = queryFactory.GetPagedListQuery<TEntity>(skipCount, rowsPerPage, whereClause, orderByClause); 
 return db.QueryAsync<TEntity>(query, param);
 ```
 
 ### Update Entity
-```
+``` C#
 var query = queryFactory.GetUpdateQuery<TEntity>(null, fieldsToSet);
 return db.ExecuteAsync(query, entity);
 
@@ -93,7 +93,7 @@ return db.ExecuteAsync(query, entity);
 ## Examples of `DeltaX.LinSql.Query`
 
 ### Update (Set specific field) with Join
-```
+``` C#
 IDbConnection db = ... 
 (var sql, var param) = new QueryBuilder<Poco>()
     .Join<Poco2>((t1, t2) => t1.Id == t2.Id)
@@ -106,7 +106,7 @@ int affectedRows = db.ExecuteAsync(sql, param).Result;
 ```
 
 ### Update Entity 
-```
+``` C#
 IDbConnection db = ... 
 var poco = new Poco { Id = 1, Active = true, Name = "Alfredo" };
 (var sql, var param) = new QueryBuilder<Poco>()
@@ -118,7 +118,7 @@ int affectedRows = db.ExecuteAsync(sql, param).Result;
 ```
 
 ### Select all fields and all rows
-```
+``` C#
 IDbConnection db = ... 
 (var sql, var param) = new QueryBuilder<Poco>()
     .Where(t => t.Active)
