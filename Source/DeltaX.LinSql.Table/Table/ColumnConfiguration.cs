@@ -3,8 +3,10 @@
     using System;
     using System.Reflection;
 
-     public class ColumnConfiguration
+    public class ColumnConfiguration
     {
+        private PropertyInfo propertyInfo;
+
         public string DtoFieldName { get; private set; }
         public string DbColumnName { get; set; }
         public string DbAlias => DtoFieldName == DbColumnName ? null : DtoFieldName;
@@ -13,10 +15,10 @@
         public bool IgnoreSelect { get; set; } = false;
         public bool IgnoreSelectList { get; set; } = false;
         public bool IgnoreInsert { get; set; } = false;
-        public bool IgnoreUpdate { get; set; } = false;        
-        public object TableDto { get;  internal set; } 
-          
-        public void Initialice(string dtoFieldName, string dbColumnName = null, bool isIdentity = false, bool isPrimaryKey = false)
+        public bool IgnoreUpdate { get; set; } = false;
+        public object TableDto { get; internal set; }
+
+        protected void Initialice(string dtoFieldName, string dbColumnName = null, bool isIdentity = false, bool isPrimaryKey = false)
         {
             DtoFieldName = dtoFieldName ?? throw new ArgumentException("Column 'dtoFieldName' cannot be null", nameof(dtoFieldName));
             DbColumnName = dbColumnName ?? dtoFieldName;
@@ -36,7 +38,6 @@
             GetPropertyInfo();
         }
 
-        private PropertyInfo propertyInfo;
         public PropertyInfo GetPropertyInfo()
         {
             if (propertyInfo == null)

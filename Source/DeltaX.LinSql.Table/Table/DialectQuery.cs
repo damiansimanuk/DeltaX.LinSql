@@ -115,7 +115,7 @@
         }
 
         public string GetInsertColumns(
-            ITableConfiguration table, 
+            ITableConfiguration table,
             IEnumerable<string> fieldsToInsert = null)
         {
             var columns = table.GetInsertColumns();
@@ -129,7 +129,7 @@
         }
 
         public string GetInsertValues(
-            ITableConfiguration table, 
+            ITableConfiguration table,
             IEnumerable<string> fieldsToInsert = null)
         {
             var columns = table.GetInsertColumns();
@@ -143,8 +143,8 @@
         }
 
         public string GetSetColumns(
-            ITableConfiguration table, 
-            IEnumerable<string> fieldsToSet = null, 
+            ITableConfiguration table,
+            IEnumerable<string> fieldsToSet = null,
             string tableAlias = null)
         {
             var columns = table.GetUpdateColumns();
@@ -163,49 +163,52 @@
             int skipCount = 0,
             int rowsPerPage = 1000,
             string whereClause = null,
-            string orderByClause = null) 
-        {  
-            var query = PagedListQueryFormatSql;
-            query = query.Replace("{SelectColumns}", GetSelectColumnsList(table, table.Identifier));
-            query = query.Replace("{TableName}", GetTableName(table, table.Identifier));
-            query = query.Replace("{WhereClause}", whereClause);
-            query = query.Replace("{OrderByClause}", orderByClause);
-            query = query.Replace("{SkipCount}", skipCount.ToString());
-            query = query.Replace("{RowsPerPage}", rowsPerPage.ToString());
+            string orderByClause = null)
+        {
+            var query = PagedListQueryFormatSql
+                .Replace("{SelectColumns}", GetSelectColumnsList(table, table.Identifier))
+                .Replace("{TableName}", GetTableName(table, table.Identifier))
+                .Replace("{WhereClause}", whereClause)
+                .Replace("{OrderByClause}", orderByClause)
+                .Replace("{SkipCount}", skipCount.ToString())
+                .Replace("{RowsPerPage}", rowsPerPage.ToString());
+
             return query;
         }
 
         public string GetSingleQuery(
-            ITableConfiguration table, 
-            string whereClause = null) 
-        {  
+            ITableConfiguration table,
+            string whereClause = null)
+        {
             if (string.IsNullOrEmpty(whereClause))
             {
                 whereClause = GetWhereClausePK(table, table.Identifier);
             }
 
-            var query = SingleQueryFormatSql;
-            query = query.Replace("{SelectColumns}", GetSelectColumns(table, table.Identifier));
-            query = query.Replace("{TableName}", GetTableName(table, table.Identifier));
-            query = query.Replace("{WhereClause}", whereClause);
+            var query = SingleQueryFormatSql
+                .Replace("{SelectColumns}", GetSelectColumns(table, table.Identifier))
+                .Replace("{TableName}", GetTableName(table, table.Identifier))
+                .Replace("{WhereClause}", whereClause);
+
             return query;
         }
 
         public string GetInsertQuery(
-            ITableConfiguration table, 
-            IEnumerable<string> fieldsToInsert = null) 
-        {  
-            var query = InsertQueryFormatSql;
-            query = query.Replace("{TableName}", GetTableName(table));
-            query = query.Replace("{InsertColumns}", GetInsertColumns(table, fieldsToInsert));
-            query = query.Replace("{InsertValues}", GetInsertValues(table, fieldsToInsert));
+            ITableConfiguration table,
+            IEnumerable<string> fieldsToInsert = null)
+        {
+            var query = InsertQueryFormatSql
+                .Replace("{TableName}", GetTableName(table))
+                .Replace("{InsertColumns}", GetInsertColumns(table, fieldsToInsert))
+                .Replace("{InsertValues}", GetInsertValues(table, fieldsToInsert));
+
             return query;
         }
 
         public string GetDeleteQuery(
-            ITableConfiguration table, 
-            string whereClause = null) 
-        {  
+            ITableConfiguration table,
+            string whereClause = null)
+        {
             if (string.IsNullOrEmpty(whereClause))
             {
                 if (!table.GetPrimaryKeysColumn().Any())
@@ -215,9 +218,10 @@
                 whereClause = GetWhereClausePK(table);
             }
 
-            var query = DeleteQueryFormatSql;
-            query = query.Replace("{TableName}", GetTableName(table));
-            query = query.Replace("{WhereClause}", whereClause);
+            var query = DeleteQueryFormatSql
+                .Replace("{TableName}", GetTableName(table))
+                .Replace("{WhereClause}", whereClause);
+
             return query;
         }
 
@@ -235,10 +239,11 @@
                 whereClause = GetWhereClausePK(table);
             }
 
-            var query = UpdateQueryFormatSql;
-            query = query.Replace("{TableName}", GetTableName(table));
-            query = query.Replace("{SetColumns}", GetSetColumns(table, fieldsToSet));
-            query = query.Replace("{WhereClause}", whereClause);
+            var query = UpdateQueryFormatSql
+                .Replace("{TableName}", GetTableName(table))
+                .Replace("{SetColumns}", GetSetColumns(table, fieldsToSet))
+                .Replace("{WhereClause}", whereClause);
+
             return query;
         }
 
@@ -246,9 +251,9 @@
             ITableConfiguration table,
             string whereClause = null)
         {
-            var query = CountQueryFormatSql;
-            query = query.Replace("{TableName}", GetTableName(table));
-            query = query.Replace("{WhereClause}", whereClause);
+            var query = CountQueryFormatSql
+                .Replace("{TableName}", GetTableName(table))
+                .Replace("{WhereClause}", whereClause);
 
             return query;
         }
