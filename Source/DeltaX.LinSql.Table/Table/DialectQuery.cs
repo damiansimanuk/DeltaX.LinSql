@@ -114,7 +114,9 @@
             return string.Join("\n\t, ", columns.Select(c => columns.Select(c => GetColumnFormated(c, tableAlias))));
         }
 
-        public string GetInsertColumns(ITableConfiguration table, IEnumerable<string> fieldsToInsert = null)
+        public string GetInsertColumns(
+            ITableConfiguration table,
+            IEnumerable<string> fieldsToInsert = null)
         {
             var columns = table.GetInsertColumns();
 
@@ -126,7 +128,9 @@
             return string.Join(", ", columns.Select(c => Encapsulation(c.DbColumnName)));
         }
 
-        public string GetInsertValues(ITableConfiguration table, IEnumerable<string> fieldsToInsert = null)
+        public string GetInsertValues(
+            ITableConfiguration table,
+            IEnumerable<string> fieldsToInsert = null)
         {
             var columns = table.GetInsertColumns();
 
@@ -138,7 +142,10 @@
             return string.Join(", ", columns.Select(c => $"@{c.DtoFieldName}"));
         }
 
-        public string GetSetColumns(ITableConfiguration table, IEnumerable<string> fieldsToSet = null, string tableAlias = null)
+        public string GetSetColumns(
+            ITableConfiguration table,
+            IEnumerable<string> fieldsToSet = null,
+            string tableAlias = null)
         {
             var columns = table.GetUpdateColumns();
 
@@ -150,5 +157,105 @@
             return string.Join("\n\t, ", columns.Select(c => $"{Encapsulation(c.DbColumnName, tableAlias)} = @{c.DtoFieldName}"));
         }
 
+
+        public string GetPagedListQuery(
+            ITableConfiguration table,
+            int skipCount = 0,
+            int rowsPerPage = 1000,
+            string whereClause = null,
+            string orderByClause = null)
+        {
+            var query = PagedListQueryFormatSql
+                .Replace("{SelectColumns}", GetSelectColumnsList(table, table.Identifier))
+                .Replace("{TableName}", GetTableName(table, table.Identifier))
+                .Replace("{WhereClause}", whereClause)
+                .Replace("{OrderByClause}", orderByClause)
+                .Replace("{SkipCount}", skipCount.ToString())
+                .Replace("{RowsPerPage}", rowsPerPage.ToString());
+
+            return query;
+        }
+
+        public string GetSingleQuery(
+            ITableConfiguration table,
+            string whereClause = null)
+        {
+            if (string.IsNullOrEmpty(whereClause))
+            {
+                whereClause = GetWhereClausePK(table, table.Identifier);
+            }
+
+            var query = SingleQueryFormatSql
+                .Replace("{SelectColumns}", GetSelectColumns(table, table.Identifier))
+                .Replace("{TableName}", GetTableName(table, table.Identifier))
+                .Replace("{WhereClause}", whereClause);
+
+            return query;
+        }
+
+        public string GetInsertQuery(
+            ITableConfiguration table,
+            IEnumerable<string> fieldsToInsert = null)
+        {
+            var query = InsertQueryFormatSql
+                .Replace("{TableName}", GetTableName(table))
+                .Replace("{InsertColumns}", GetInsertColumns(table, fieldsToInsert))
+                .Replace("{InsertValues}", GetInsertValues(table, fieldsToInsert));
+
+            return query;
+        }
+
+        public string GetDeleteQuery(
+            ITableConfiguration table,
+            string whereClause = null)
+        {
+            if (string.IsNullOrEmpty(whereClause))
+            {
+                if (!table.GetPrimaryKeysColumn().Any())
+                {
+                    throw new Exception("Can not detected Primary key for delete clause!");
+                }
+                whereClause = GetWhereClausePK(table);
+            }
+
+            var query = DeleteQueryFormatSql
+                .Replace("{TableName}", GetTableName(table))
+                .Replace("{WhereClause}", whereClause);
+
+            return query;
+        }
+
+        public string GetUpdateQuery(
+            ITableConfiguration table,
+            string whereClause = null,
+            IEnumerable<string> fieldsToSet = null)
+        {
+            if (string.IsNullOrEmpty(whereClause))
+            {
+                if (!table.GetPrimaryKeysColumn().Any())
+                {
+                    throw new Exception("Can not detected Primary key for update clause!");
+                }
+                whereClause = GetWhereClausePK(table);
+            }
+
+            var query = UpdateQueryFormatSql
+                .Replace("{TableName}", GetTableName(table))
+                .Replace("{SetColumns}", GetSetColumns(table, fieldsToSet))
+                .Replace("{WhereClause}", whereClause);
+
+            return query;
+        }
+
+        public string GetCountQuery(
+            ITableConfiguration table,
+            string whereClause = null)
+        {
+            var query = CountQueryFormatSql
+                .Replace("{TableName}", GetTableName(table))
+                .Replace("{WhereClause}", whereClause);
+
+            return query;
+        }
     }
 }

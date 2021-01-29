@@ -129,7 +129,7 @@
             return member?.Member as PropertyInfo;
         }
 
-        public static TableConfiguration<TTable> AutoConfigure() 
+        public static TableConfiguration<TTable> AutoConfigure()
         {
             var type = typeof(TTable);
 
@@ -139,8 +139,8 @@
                 name: (tableAttrib != null ? tableAttrib.Name : type.Name),
                 schema: (tableAttrib != null ? tableAttrib.Schema : null));
 
-            
-            foreach(var x in type.GetProperties() )
+
+            foreach (var x in type.GetProperties())
             {
                 var isKey = x.GetCustomAttribute(typeof(KeyAttribute)) != null
                        || x.Name.ToUpper() == "ID"

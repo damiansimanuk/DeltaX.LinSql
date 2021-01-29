@@ -90,93 +90,52 @@
         {
             table.InvalidatePk();
             tablesConfig.Add(typeof(TTable), table);
-        } 
-
-
-        public string GetPagedListQuery<TTable>(int skipCount = 0, int rowsPerPage = 1000, string whereClause = null, string orderByClause = null)
-            where TTable : class
-        {
-            var table = GetTable<TTable>();
-
-            var query = DialectQuery.PagedListQueryFormatSql;
-            query = query.Replace("{SelectColumns}", DialectQuery.GetSelectColumnsList(table, table.Identifier));
-            query = query.Replace("{TableName}", DialectQuery.GetTableName(table, table.Identifier));
-            query = query.Replace("{WhereClause}", whereClause);
-            query = query.Replace("{OrderByClause}", orderByClause);
-            query = query.Replace("{SkipCount}", skipCount.ToString());
-            query = query.Replace("{RowsPerPage}", rowsPerPage.ToString());
-            return query;
         }
 
 
-        public string GetSingleQuery<TTable>(string whereClause = null)
+        public string GetPagedListQuery<TTable>(
+            int skipCount = 0,
+            int rowsPerPage = 1000,
+            string whereClause = null,
+            string orderByClause = null)
             where TTable : class
         {
             var table = GetTable<TTable>();
-
-            if (string.IsNullOrEmpty(whereClause))
-            {
-                whereClause = DialectQuery.GetWhereClausePK(table, table.Identifier);
-            }
-
-            var query = DialectQuery.SingleQueryFormatSql;
-            query = query.Replace("{SelectColumns}", DialectQuery.GetSelectColumns(table, table.Identifier));
-            query = query.Replace("{TableName}", DialectQuery.GetTableName(table, table.Identifier));
-            query = query.Replace("{WhereClause}", whereClause);
-            return query;
+            return DialectQuery.GetPagedListQuery(table, skipCount, rowsPerPage, whereClause, orderByClause);
         }
 
-        public string GetInsertQuery<TTable>(IEnumerable<string> fieldsToInsert = null)
+
+        public string GetSingleQuery<TTable>(
+            string whereClause = null)
             where TTable : class
         {
             var table = GetTable<TTable>();
-
-            var query = DialectQuery.InsertQueryFormatSql;
-            query = query.Replace("{TableName}", DialectQuery.GetTableName(table));
-            query = query.Replace("{InsertColumns}", DialectQuery.GetInsertColumns(table, fieldsToInsert));
-            query = query.Replace("{InsertValues}", DialectQuery.GetInsertValues(table, fieldsToInsert));
-            return query;
+            return DialectQuery.GetSingleQuery(table, whereClause);
         }
 
-        public string GetDeleteQuery<TTable>(string whereClause = null)
+        public string GetInsertQuery<TTable>(
+            IEnumerable<string> fieldsToInsert = null)
             where TTable : class
         {
             var table = GetTable<TTable>();
-
-            if (string.IsNullOrEmpty(whereClause))
-            {
-                if (!table.GetPrimaryKeysColumn().Any())
-                {
-                    throw new Exception("Can not detected Primary key for delete clause!");
-                }
-                whereClause = DialectQuery.GetWhereClausePK(table);
-            }
-
-            var query = DialectQuery.DeleteQueryFormatSql;
-            query = query.Replace("{TableName}", DialectQuery.GetTableName(table));
-            query = query.Replace("{WhereClause}", whereClause);
-            return query;
+            return DialectQuery.GetInsertQuery(table, fieldsToInsert);
         }
 
-        public string GetUpdateQuery<TTable>(string whereClause = null, IEnumerable<string> fieldsToSet = null)
+        public string GetDeleteQuery<TTable>(
+            string whereClause = null)
             where TTable : class
         {
             var table = GetTable<TTable>();
+            return DialectQuery.GetDeleteQuery(table, whereClause);
+        }
 
-            if (string.IsNullOrEmpty(whereClause))
-            {
-                if (!table.GetPrimaryKeysColumn().Any())
-                {
-                    throw new Exception("Can not detected Primary key for update clause!");
-                }
-                whereClause = DialectQuery.GetWhereClausePK(table);
-            }
-
-            var query = DialectQuery.UpdateQueryFormatSql;
-            query = query.Replace("{TableName}", DialectQuery.GetTableName(table));
-            query = query.Replace("{SetColumns}", DialectQuery.GetSetColumns(table, fieldsToSet));
-            query = query.Replace("{WhereClause}", whereClause);
-            return query;
+        public string GetUpdateQuery<TTable>(
+            string whereClause = null,
+            IEnumerable<string> fieldsToSet = null)
+            where TTable : class
+        {
+            var table = GetTable<TTable>();
+            return DialectQuery.GetUpdateQuery(table, whereClause, fieldsToSet);
         }
 
 
@@ -185,18 +144,13 @@
         {
             var table = GetTable<TTable>();
 
-            var query = DialectQuery.CountQueryFormatSql;
-            query = query.Replace("{TableName}", DialectQuery.GetTableName(table));
-            query = query.Replace("{WhereClause}", whereClause);
-
-            return query;
+            return DialectQuery.GetCountQuery(table, whereClause);
         }
 
         public string GetSelectColumns<TTable>(bool useTableAlias=true)
          where TTable : class
         {
             var table = GetTable<TTable>();
-
             return DialectQuery.GetSelectColumns(table, useTableAlias ? table.Identifier : null);
         }
 
