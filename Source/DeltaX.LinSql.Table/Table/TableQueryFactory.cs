@@ -11,8 +11,7 @@
         public TableQueryFactory(DialectQuery dialectQuery)
         {
             tablesConfig = new Dictionary<Type, ITableConfiguration>();
-            DialectQuery = dialectQuery;
-            instance = this;
+            DialectQuery = dialectQuery; 
         }
 
         public TableQueryFactory(DialectType dialect) : this(new DialectQuery(dialect))

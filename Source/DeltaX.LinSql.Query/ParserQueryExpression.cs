@@ -8,19 +8,19 @@
     using System.Linq.Expressions;
     using System.Reflection;
 
-    public class QueryParser : ExpressionVisitor
+    public class ParserQueryExpression : ExpressionVisitor
     {
         private QueryStream stream;
         private List<ExpressionType> operators;
 
-        public QueryParser(Expression expression, TableQueryFactory tableFactory = null, IEnumerable<Type> allowedTables = null)
+        public ParserQueryExpression(Expression expression, TableQueryFactory tableFactory = null, IEnumerable<Type> allowedTables = null)
         {
             this.operators = new List<ExpressionType>();
             this.stream = new QueryStream(tableFactory, allowedTables);
             Visit(expression);
         }
 
-        public QueryParser(QueryStream stream)
+        public ParserQueryExpression(QueryStream stream)
         {
             this.stream = stream;
             this.operators = new List<ExpressionType>();
@@ -83,7 +83,7 @@
             var member = QueryHelper.GetFirstMemberExpression(node, stream.AllowedTables);
             if (member == null && node.NodeType != ExpressionType.Parameter)
             {
-                stream.AddExpression(node);
+                stream.AddParameterExpression(node);
                 return node;
             }
             else
@@ -148,9 +148,9 @@
             }
 
             // External Variable Value
-            if (QueryHelper.IsVariable(node))
+            if (QueryHelper.IsConstant(node))
             {
-                stream.AddExpression(node);
+                stream.AddParameterExpression(node);
                 return node;
             } 
 
@@ -200,7 +200,7 @@
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            stream.AddParameter(node.Value);
+            stream.AddParameterValue(node.Value);
             return base.VisitConstant(node);
         }
 
@@ -243,7 +243,7 @@
         { 
             if (stream.IsAllowed(member.Expression.Type))
             {
-                stream.AddIsNullOrEmpty(member.Expression.Type, member.Member.Name, not);
+                stream.AddTableFieldIsNullOrEmpty(member.Expression.Type, member.Member.Name, not);
             } 
         }
     }

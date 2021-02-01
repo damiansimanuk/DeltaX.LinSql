@@ -23,13 +23,13 @@ namespace DeltaX.RestApiDemo1.Controllers
         }
 
         [HttpGet("user/{id}")]
-        public Task<UserDto> GetUser(int id)
+        public Task<UserModel> GetUser(int id)
         {
             return repository.GetUserAsync(id);
         }
 
         [HttpPost("users")]
-        public Task<UserDto> PostUser([FromBody] CreateUserDto user)
+        public Task<UserModel> PostUser([FromBody] CreateUserDto user)
         {
             return repository.InsertUserAsync(user);
         }
@@ -41,7 +41,7 @@ namespace DeltaX.RestApiDemo1.Controllers
         }
 
         [HttpPut("user/{userId}")]
-        public Task<UserDto> UpdateUser(int userId, [FromBody] UpdateUserDto user)
+        public Task<UserModel> UpdateUser(int userId, [FromBody] UpdateUserDto user)
         {
             return repository.UpdateUserAsync(userId, user);
         }

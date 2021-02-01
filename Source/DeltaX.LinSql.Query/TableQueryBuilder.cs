@@ -21,7 +21,7 @@
         // public HashSet<object> TablesSelect { get; private set; }
 
 
-        public TableQueryBuilder()
+        internal TableQueryBuilder()
         {
             Tables = new HashSet<Type>();
             ExpressionWhere = new List<Expression>();

@@ -39,7 +39,7 @@
         public QueryStream Parse(TableQueryFactory tableFactory = null, QueryStream stream = null)
         {
             tableFactory ??= TableQueryFactory.GetInstance(); 
-            stream = stream ?? new QueryStream(null, Builder.GetTables()); 
+            stream ??= new QueryStream(tableFactory, Builder.GetTables()); 
 
             // DELETE
             if (Builder.TableDeleteType != null)
@@ -68,35 +68,52 @@
             }
         }
 
-        private QueryStream ParseDelete(TableQueryFactory tableFactory, QueryStream stream, Type entityType, object entity)
+        private (ITableConfiguration tableJoin, string joinClause) SelectTableJoin(
+            TableQueryFactory tableFactory,
+            QueryStream mainStream,
+            KeyValuePair<Type, Expression> tablePair)
         {
-            var table = tableFactory.GetTable(entityType);
-            stream.AddSql($"DELETE {table.Identifier}");
+            var tableJoin = tableFactory.GetTable(tablePair.Key);
 
-            ParseFrom(tableFactory, stream);
-            // JOIN
-            ParseJoin(tableFactory, stream);
-            // WHERE
-            ParseWhere(tableFactory, stream, entityType, entity);
+            var streamJoin = QueryStream.CreateFrom(mainStream);
+            new ParserQueryExpression(streamJoin).Visit(tablePair.Value);
+
+            return (tableJoin, streamJoin.GetSql());
+        }
+
+        private string SelectWhereCondition(QueryStream mainStream, Expression expression)
+        {
+            var streamWhere = QueryStream.CreateFrom(mainStream);
+            new ParserQueryExpression(streamWhere).Visit(expression);
+
+            return streamWhere.GetSql();
+        }
+
+        private QueryStream ParseDelete(TableQueryFactory tableFactory, QueryStream mainStream, Type entityType, object entity)
+        {
+            var tableDelete = tableFactory.GetTable(entityType);
+            var tableFrom = tableFactory.GetTable(Builder.GetTables().First());
+
+            if(tableDelete != tableFrom)
+            {
+                throw new Exception("tableDelete != tableFrom");
+            } 
+
+            // JOIN 
+            IEnumerable<(ITableConfiguration tableJoin, string joinClause)> joinConditions = Builder.ExpressionJoin
+                .Select(tablePair => SelectTableJoin(tableFactory, mainStream, tablePair)) 
+                .ToArray();
+           
+            // WHere
+            IEnumerable<string> whereConditions = Builder.ExpressionWhere
+                .Select(expression => SelectWhereCondition(mainStream, expression))
+                .ToArray();
+           
+            var sql = tableFactory.DialectQuery.GetDeleteJoined(tableDelete, joinConditions, whereConditions); 
+            mainStream.AddSql(sql); 
              
-            return stream;
-        }
-
-        private QueryStream ParseInsert(TableQueryFactory tableFactory, QueryStream stream, Type entityType, object entity)
-        {
-            var table = tableFactory.GetTable(entityType);
-
-            var columns = tableFactory.DialectQuery.GetInsertColumns(table);
-            stream.AddSql($"DELETE {table.Identifier}");
-
-            ParseFrom(tableFactory, stream);
-            // JOIN
-            ParseJoin(tableFactory, stream);
-            // WHERE
-            ParseWhere(tableFactory, stream, entityType, entity);
-
-            return stream;
-        }
+            return mainStream;
+        } 
 
         private QueryStream ParseUpdate(TableQueryFactory tableFactory, QueryStream stream, Type entityType, object entity)
         { 
@@ -108,7 +125,7 @@
             {
                 var colName = tableFactory.DialectQuery.Encapsulation(col.DbColumnName, tableUpdate.Identifier);
                 stream.AddSql(first ? $"\n\tSET {colName} = " : $"\n\t, {colName} = ");
-                stream.AddParameter(col.GetPropertyInfo().GetValue(entity), $"{tableUpdate.Identifier}_{col.DtoFieldName}");
+                stream.AddParameterValue(col.GetPropertyInfo().GetValue(entity), $"{tableUpdate.Identifier}_{col.DtoFieldName}");
                 first = false;
             }
 
@@ -152,17 +169,17 @@
                             }
                             else if (valueMember != null && valueMember.NodeType != ExpressionType.Parameter)
                             {
-                                var qp = new QueryParser(stream);
+                                var qp = new ParserQueryExpression(stream);
                                 qp.Visit(valExpr);
                             }
                             else
                             {
-                                stream.AddParameter(value.value, $"{table.Identifier}_{fieldName}");
+                                stream.AddParameterValue(value.value, $"{table.Identifier}_{fieldName}");
                             }
                         }
                         else
                         {
-                            stream.AddParameter(value.value, $"{table.Identifier}_{fieldName}");
+                            stream.AddParameterValue(value.value, $"{table.Identifier}_{fieldName}");
                         }
 
                         first = false;
@@ -188,7 +205,7 @@
                 stream.AddSql(selecAdded ? "\n\t, " : "SELECT ");
                 selecAdded = true;
 
-                var s = new SelectParser(expression);
+                var s = new ParserSelectExpression(expression, tableFactory);
                 stream.AddSql(s.GetSql());
             } 
 
@@ -236,7 +253,7 @@
                 var tableName = tableFactory.DialectQuery.GetTableName(tableJoin, tableJoin.Identifier);
 
                 stream.AddSql($" \nJOIN {tableName} ON ");
-                var qp = new QueryParser(stream);
+                var qp = new ParserQueryExpression(stream);
                 qp.Visit(table.Value);
             }
             return Builder.ExpressionJoin.Count();
@@ -249,7 +266,7 @@
             {
                 stream.AddSql(whereAdded > 0 ? "\n\tAND " : "\nWHERE ");
 
-                var qp = new QueryParser(stream);
+                var qp = new ParserQueryExpression(stream);
                 qp.Visit(expression);
                 whereAdded++;
             }
@@ -263,7 +280,7 @@
                 {
                     stream.AddTableField(entityType, pk.DtoFieldName);
                     stream.AddOperator("=");
-                    stream.AddParameter(pk.GetPropertyInfo().GetValue(entity), $"{table.Identifier}_{pk.DtoFieldName}");
+                    stream.AddParameterValue(pk.GetPropertyInfo().GetValue(entity), $"{table.Identifier}_{pk.DtoFieldName}");
                     whereAdded++;
                 }
             }

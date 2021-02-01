@@ -10,26 +10,39 @@
 
     public class QueryStream
     {
-        private StringBuilder sql = new StringBuilder();
-        private Dictionary<string, object> Parameters = new Dictionary<string, object>();
-        //  private Dictionary<ITableConfiguration, HashSet<ColumnConfiguration>> tableColumns = new Dictionary<ITableConfiguration, HashSet<ColumnConfiguration>>();
+        private StringBuilder sql;
+        private Dictionary<string, object> parameters;
         private TableQueryFactory tableFactory;
         private int paramGeneratorOffset = 0;
 
-        public QueryStream(TableQueryFactory tableFactory = null, IEnumerable<Type> allowedTables = null, int? paramGeneratorOffset = null)
+        public QueryStream(TableQueryFactory tableFactory = null, 
+            IEnumerable<Type> allowedTables = null, 
+            int? paramGeneratorOffset = null,
+            Dictionary<string, object> parameters = null)
         {
+            this.sql = new StringBuilder();
+            this.parameters = parameters ?? new Dictionary<string, object>();
             this.paramGeneratorOffset = paramGeneratorOffset ?? 0;
             this.tableFactory = tableFactory ?? TableQueryFactory.GetInstance();
-            this.AllowedTables = allowedTables ?? this.tableFactory.GetConfiguredTables().Select(t => t.Key).ToArray();
+            this.AllowedTables = allowedTables ?? this.tableFactory.GetConfiguredTables().Select(t => t.Key).ToArray(); 
         }
 
-        private string GetNewParameterId() => $"arg_{Parameters.Count + paramGeneratorOffset}";
+        public static QueryStream CreateFrom(QueryStream stream)
+        {
+            return new QueryStream(
+                stream.tableFactory,
+                stream.AllowedTables,
+                stream.paramGeneratorOffset,
+                stream.parameters);
+        }
+
+        private string GetNewParameterId() => $"arg_{parameters.Count + paramGeneratorOffset}";
 
         public IEnumerable<Type> AllowedTables { get; private set; }
 
         public IDictionary<string, object> GetParameters()
         {
-            return Parameters.ToDictionary(e => e.Key,
+            return parameters.ToDictionary(e => e.Key,
                 e =>
                 {
                     if (e.Value is Expression node)
@@ -113,7 +126,7 @@
             sql.Append(not ? " IS NOT NULL" : " IS NULL");
         }
 
-        public void AddIsNullOrEmpty(Type tableType, string columnName, bool not)
+        public void AddTableFieldIsNullOrEmpty(Type tableType, string columnName, bool not)
         {
             var table = tableFactory.GetTable(tableType); 
             var column = table.Columns.FirstOrDefault(c => c.DtoFieldName == columnName);
@@ -140,7 +153,7 @@
             return column != null;
         }
 
-        public void AddParameter(object val, string argId = null)
+        public void AddParameterValue(object val, string argId = null)
         {
             if (val == null)
             {
@@ -149,15 +162,15 @@
             }
 
             argId ??= GetNewParameterId();
-            Parameters.Add(argId, val);
+            parameters.Add(argId, val);
 
             sql.Append($"@{argId}");
         }
 
-        public void AddExpression(Expression val, string argId = null)
+        public void AddParameterExpression(Expression val, string argId = null)
         {
             argId ??= GetNewParameterId();
-            Parameters.Add(argId, val);
+            parameters.Add(argId, val);
 
             sql.Append($"@{argId}");
         }

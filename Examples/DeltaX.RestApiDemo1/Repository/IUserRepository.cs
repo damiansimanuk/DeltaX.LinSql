@@ -8,10 +8,10 @@ namespace DeltaX.RestApiDemo1.Repository
 {
     public interface IUserRepository
     {
-        Task<UserDto> GetUserAsync(int id);
+        Task<UserModel> GetUserAsync(int id);
         Task<IEnumerable<UserListDto>> GetUsersAsync();
-        Task<UserDto> InsertUserAsync(CreateUserDto item);
+        Task<UserModel> InsertUserAsync(CreateUserDto item);
         Task<int> RemoveUserAsync(int id);
-        Task<UserDto> UpdateUserAsync(int userId, UpdateUserDto item);
+        Task<UserModel> UpdateUserAsync(int userId, UpdateUserDto item);
     }
 }

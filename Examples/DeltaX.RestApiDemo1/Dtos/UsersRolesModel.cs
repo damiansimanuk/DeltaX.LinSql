@@ -3,7 +3,7 @@
 namespace DeltaX.RestApiDemo1.Dtos
 {
      
-    public class UsersRolesDto
+    public class UsersRolesModel
     {
         public int UserId { get; internal set; }
         public int RolId { get; internal set; }        

@@ -16,10 +16,10 @@ namespace DeltaX.RestApiDemo1.Repository
     public class UserRepository : IUserRepository
     {
         IDbConnection db;
-        private readonly TableQueryFactory queryFactory;
+        private readonly DemoTableQueryFactory queryFactory;
         private readonly ILogger<UserRepository> logger;
 
-        public UserRepository(IDbConnection db, TableQueryFactory queryFactory, ILogger<UserRepository> logger = null)
+        public UserRepository(IDbConnection db, DemoTableQueryFactory queryFactory, ILogger<UserRepository> logger = null)
         {
             this.db = db;
             this.queryFactory = queryFactory;
@@ -28,26 +28,26 @@ namespace DeltaX.RestApiDemo1.Repository
 
         public async Task<IEnumerable<UserListDto>> GetUsersAsync()
         {
-            (var sql, var param) = new QueryBuilder<UserDto>()
+            (var sql, var param) = new QueryBuilder<UserModel>()
                 .SelectAll()
-                .GetSqlParameters();
+                .GetSqlParameters(queryFactory);
 
             var users = await db.QueryAsync<UserListDto>(sql, param);
             return users;
         }
 
-        public async Task<UserDto> GetUserAsync(int id)
+        public async Task<UserModel> GetUserAsync(int id)
         {  
-            var user = await GetSingleAsync<UserDto>(u => u.Id == id);
+            var user = await GetSingleAsync<UserModel>(u => u.Id == id);
             if (user != null)
             {
-                (var sql, var param) = new QueryBuilder<UsersRolesDto>()
-                    .Join<RoleDto>((ur, r) => ur.RolId == r.Id)
+                (var sql, var param) = new QueryBuilder<UsersRolesModel>()
+                    .Join<RoleModel>((ur, r) => ur.RolId == r.Id)
                     .SelectAll()
                     .Where(ur => ur.UserId == id)
-                    .GetSqlParameters();
+                    .GetSqlParameters(queryFactory);
 
-                var roles = await db.QueryAsync<UsersRolesDto>(sql, param);
+                var roles = await db.QueryAsync<UsersRolesModel>(sql, param);
                 user.Roles = roles.ToArray();
             }
             return user;
@@ -56,29 +56,30 @@ namespace DeltaX.RestApiDemo1.Repository
         public async Task<int> RemoveUserAsync(int id)
         {
             using (var transactionScope = new TransactionScope())
-            {
-                (var sql, var param) = new QueryBuilder<UserDto>()
-                    .Where(u => u.Id == id)
+            { 
+                (var sql, var param) = new QueryBuilder<UsersRolesModel>()
+                    .Join<UserModel>((ur, u) => ur.UserId == u.Id)
+                    .Where((ur, u) => u.Id == id)
                     .Delete()
-                    .GetSqlParameters();
+                    .GetSqlParameters(queryFactory);
 
                 var affectedRows = await db.ExecuteAsync(sql, param);
-
-                (sql, param) = new QueryBuilder<UsersRolesDto>()
-                    .Where(ur => ur.UserId == id)
+                 
+                (sql, param) = new QueryBuilder<UserModel>()
+                    .Where(u => u.Id == id)
                     .Delete()
-                    .GetSqlParameters();
+                    .GetSqlParameters(queryFactory);
 
                 affectedRows += await db.ExecuteAsync(sql, param);
                 return affectedRows;
             }
         }
 
-        public async Task<UserDto> InsertUserAsync(CreateUserDto item)
+        public async Task<UserModel> InsertUserAsync(CreateUserDto item)
         {
             using (var transactionScope = new TransactionScope())
             {
-                var userId = await InsertAsync<UserDto, int>(new UserDto
+                var userId = await InsertAsync<UserModel, int>(new UserModel
                 {
                     Username = item.Username,
                     FullName = item.FullName,
@@ -94,7 +95,7 @@ namespace DeltaX.RestApiDemo1.Repository
             }            
         }
 
-        public async Task<UserDto> UpdateUserAsync(int userId, UpdateUserDto item)
+        public async Task<UserModel> UpdateUserAsync(int userId, UpdateUserDto item)
         {
             var user = await GetUserAsync(userId);
             user.FullName = item.FullName ?? user.FullName;
@@ -104,7 +105,7 @@ namespace DeltaX.RestApiDemo1.Repository
 
             using (var transactionScope = new TransactionScope())
             {
-                var query = queryFactory.GetUpdateQuery<UserDto>();
+                var query = queryFactory.GetUpdateQuery<UserModel>();
                 await db.ExecuteAsync(query, user);
 
                 if (item.AddRoles?.Any() == true)
@@ -124,9 +125,11 @@ namespace DeltaX.RestApiDemo1.Repository
         {
             foreach (var rol in roles)
             {
-                var rolEntity = await GetSingleAsync<RoleDto>(r => r.RolName == rol.RolName);
-                var rolId = rolEntity?.Id ?? await InsertAsync<RoleDto, int>(new RoleDto { RolName = rol.RolName });
-                await InsertAsync<UsersRolesDto>(new UsersRolesDto
+                var rolEntity = await GetSingleAsync<RoleModel>(r => r.RolName == rol.RolName);
+                var rolId = rolEntity?.Id 
+                    ?? await InsertAsync<RoleModel, int>(new RoleModel { RolName = rol.RolName });
+
+                await InsertAsync<UsersRolesModel>(new UsersRolesModel
                 {
                     UserId = userId,
                     RolId = rolId,
@@ -140,11 +143,11 @@ namespace DeltaX.RestApiDemo1.Repository
 
         public async void RemoveUsersRolesAsync(int userId, string[] roleNames)
         {
-            (var sql, var param) = new QueryBuilder<UsersRolesDto>()
-                .Join<RoleDto>((ur, r) => ur.RolId == r.Id)
+            (var sql, var param) = new QueryBuilder<UsersRolesModel>()
+                .Join<RoleModel>((ur, r) => ur.RolId == r.Id)
                 .Where((ur, r) => ur.UserId == userId && roleNames.Contains(r.RolName))
                 .Delete()
-                .GetSqlParameters();
+                .GetSqlParameters(queryFactory);
 
             await db.ExecuteAsync(sql, param);
         }
@@ -156,7 +159,7 @@ namespace DeltaX.RestApiDemo1.Repository
             (var sql, var param) = new QueryBuilder<TEntity>()
                 .Where(predicate)
                 .SelectAll()
-                .GetSqlParameters();
+                .GetSqlParameters(queryFactory);
 
             return await db.QueryFirstOrDefaultAsync<TEntity>(sql, param);
         }

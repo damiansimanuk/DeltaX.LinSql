@@ -14,9 +14,10 @@
         public string DeleteQueryFormatSql { get; private set; }
         public string UpdateQueryFormatSql { get; private set; }
         public string CountQueryFormatSql { get; private set; }
+        public string DeleteQueryWithJoinFormatSql { get; private set; }
         public DialectType Dialect { get; private set; }
 
-        public DialectQuery(DialectType dialect)
+        public  DialectQuery(DialectType dialect)
         {
             DefaultInitialization();
             Dialect = dialect;
@@ -73,6 +74,15 @@
             DeleteQueryFormatSql = "DELETE FROM {TableName} \n{WhereClause}";
             UpdateQueryFormatSql = "UPDATE {TableName} SET\n\t {SetColumns} \n{WhereClause}";
             CountQueryFormatSql = "SELECT count(*) as Count FROM {TableName} \n{WhereClause}";
+
+               DeleteQueryWithJoinFormatSql = @"
+DELETE FROM {TableName}
+WHERE {primaryKeyDelete} IN (
+    SELECT {SelectFields} 
+    FROM {TableFrom}
+    {JoinsClause}
+    {WhereClause}
+)";
         }
 
         public string GetTableName(ITableConfiguration table, string tableAlias = null)
@@ -257,5 +267,33 @@
 
             return query;
         }
+
+
+        public string GetDeleteJoined(
+           ITableConfiguration table, 
+           IEnumerable<(ITableConfiguration tableJoin, string joinClause)> tablesJoins,
+           IEnumerable<string> whereConditions )
+        {
+            var primaryKeyColumn = table.GetPrimaryKeysColumn().FirstOrDefault()
+                ?? throw new Exception("Can not detected without Primary key!");
+             
+            var whereClause =  "WHERE " + string.Join(" AND ", whereConditions);
+            var joinsClause = string.Join("\n\t", 
+                tablesJoins.Select(pair => 
+                    $"JOIN {GetTableName(pair.tableJoin, pair.tableJoin.Identifier)} ON {pair.joinClause}"
+                    )
+                ); 
+
+            var query = DeleteQueryWithJoinFormatSql
+                .Replace("{TableName}", GetTableName(table))
+                .Replace("{primaryKeyDelete}", Encapsulation(primaryKeyColumn.DbColumnName))
+                .Replace("{SelectFields}", Encapsulation(primaryKeyColumn.DbColumnName, table.Identifier))
+                .Replace("{TableFrom}", GetTableName(table, table.Identifier))
+                .Replace("{JoinsClause}", joinsClause)
+                .Replace("{WhereClause}", whereClause);
+
+            return query;
+        }
+
     }
 }

@@ -68,7 +68,7 @@ namespace DeltaX.LinSql.Query.UniTest
         {
             Expression<Func<Poco, bool>> expression = t => t.Id == 2;
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters(); 
 
@@ -86,7 +86,7 @@ namespace DeltaX.LinSql.Query.UniTest
 
             Expression<Func<Poco, bool>> expression = t => t.Id == 2 && t.Updated < updated;
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters(); 
 
@@ -108,7 +108,7 @@ namespace DeltaX.LinSql.Query.UniTest
 
             Expression<Func<Poco, bool>> expression = t => t.Id == 2 && t.Updated < updated;
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var param = qp.GetParameters(); 
          
             Assert.AreEqual(2, param.Count());
@@ -149,7 +149,7 @@ namespace DeltaX.LinSql.Query.UniTest
         {
             Expression<Func<Poco, bool>> expression = t => t.Name.Contains("Pepe");
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -164,7 +164,7 @@ namespace DeltaX.LinSql.Query.UniTest
         { 
             Expression<Func<Poco, bool>> expression = t => (t.Id == 2 && t.Id < 3) || t.Id == 5;
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -181,7 +181,7 @@ namespace DeltaX.LinSql.Query.UniTest
         { 
             Expression<Func<Poco, bool>> expression = t => t.Active;
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -194,7 +194,7 @@ namespace DeltaX.LinSql.Query.UniTest
         { 
             Expression<Func<Poco, bool>> expression = t => !t.Active;
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -207,7 +207,7 @@ namespace DeltaX.LinSql.Query.UniTest
         { 
             Expression<Func<Poco, bool>> expression = t => t.Name == null;
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -220,7 +220,7 @@ namespace DeltaX.LinSql.Query.UniTest
         {
             Expression<Func<Poco, bool>> expression = t => string.IsNullOrEmpty(t.Name);
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -233,7 +233,7 @@ namespace DeltaX.LinSql.Query.UniTest
         {
             Expression<Func<Poco, bool>> expression = t => !t.Active && t.Updated < DateTime.Now.AddDays(1);
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -248,7 +248,7 @@ namespace DeltaX.LinSql.Query.UniTest
             List<int> list = Enumerable.Range(1, 3).ToList();
             Expression<Func<Poco, bool>> expression = t => list.Contains(t.Id);
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -262,7 +262,7 @@ namespace DeltaX.LinSql.Query.UniTest
             List<string> list = Enumerable.Range(1, 3).Select(e => $"Name{e}").ToList();
             Expression<Func<Poco, bool>> expression = t => list.Contains(t.Name);
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -277,7 +277,7 @@ namespace DeltaX.LinSql.Query.UniTest
             List<int> listInt = Enumerable.Range(1, 3).ToList();
             Expression<Func<Poco, bool>> expression = t => listStr.Contains(t.Name) && listInt.Contains(t.Id);
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -292,7 +292,7 @@ namespace DeltaX.LinSql.Query.UniTest
             List<int> listInt = Enumerable.Range(1, 3).ToList();
             Expression<Func<Poco, bool>> expression = t => !listStr.Contains(t.Name) && !listInt.Contains(t.Id);
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -306,7 +306,7 @@ namespace DeltaX.LinSql.Query.UniTest
         {
             Expression<Func<Poco, Poco2, bool>> expression = (t1, t2) => t1.Id == t2.Id && t2.Active;
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -319,7 +319,7 @@ namespace DeltaX.LinSql.Query.UniTest
         {
             Expression<Func<Poco, Poco2, bool>> expression = (t1, t2) => t1.Name != null && t2.Active;
 
-            var qp = new QueryParser(expression);
+            var qp = new ParserQueryExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -332,7 +332,7 @@ namespace DeltaX.LinSql.Query.UniTest
         {
             Expression<Func<Poco, Poco2, object[]>> expression = (t1, t2) => new object[] { t1.Id, t2.Id, t2.Active };
 
-            var qp = new SelectParser(expression);
+            var qp = new ParserSelectExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -345,7 +345,7 @@ namespace DeltaX.LinSql.Query.UniTest
         {
             Expression<Func<Poco, Poco2, object[]>> expression = (t1, t2) => new object[] { t1.Id, t2.Id, t2.Active, "t_2.FullName" };
 
-            var qp = new SelectParser(expression);
+            var qp = new ParserSelectExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -358,7 +358,7 @@ namespace DeltaX.LinSql.Query.UniTest
         {
             Expression<Func<Poco, Poco2, object>> expression = (t1, t2) => new { pepe = t1.Id, t2.Active };
 
-            var qp = new SelectParser(expression);
+            var qp = new ParserSelectExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -377,7 +377,7 @@ namespace DeltaX.LinSql.Query.UniTest
             var columns = "" + factory.DialectQuery.GetSelectColumnsList(table, table.Identifier);
             var c = columns.ToString();
 
-            var qp = new SelectParser(expression);
+            var qp = new ParserSelectExpression(expression);
             var whereSql = qp.GetSql();
             var param = qp.GetParameters();
 
@@ -520,12 +520,16 @@ namespace DeltaX.LinSql.Query.UniTest
                 .Delete();
 
             var stream = q.Parse();
-            var sql = stream.GetSql();
+            var sql = NormalizeString(stream.GetSql());
             var param = stream.GetParameters();
 
-            Assert.AreEqual("DELETE t_1 " +
-                "\nFROM poco t_1" +
-                "\nWHERE t_1.\"Active\" <> 0 AND (t_1.\"idPoco\" = @arg_0)", sql.Trim());
+            Assert.AreEqual("DELETE " +
+                "FROM poco " +
+                "WHERE \"idPoco\" IN " +
+                "( SELECT t_1.\"idPoco\" " +
+                "FROM poco t_1 " +
+                "WHERE t_1.\"Active\" <> 0 AND (t_1.\"idPoco\" = @arg_0) " +
+                ")", sql.Trim());
             Assert.AreEqual(1, param.Count());
             Assert.AreEqual(2, param["arg_0"]);
         }
@@ -542,10 +546,13 @@ namespace DeltaX.LinSql.Query.UniTest
             var sql = NormalizeString(stream.GetSql());
             var param = stream.GetParameters();
 
-            Assert.AreEqual("DELETE t_1 " +
+            Assert.AreEqual("DELETE " +
+                "FROM poco " +
+                "WHERE \"idPoco\" IN " +
+                "( SELECT t_1.\"idPoco\" " +
                 "FROM poco t_1 " +
                 "JOIN poco2 t_2 ON t_1.\"idPoco\" = t_2.\"Id\" " +
-                "WHERE (t_1.\"Active\" <> 0 AND (t_1.\"idPoco\" = @arg_0)) AND t_2.\"Active\" <> 0", sql.Trim());
+                "WHERE (t_1.\"Active\" <> 0 AND (t_1.\"idPoco\" = @arg_0)) AND t_2.\"Active\" <> 0 )", sql.Trim());
             Assert.AreEqual(1, param.Count());
             Assert.AreEqual(2, param["arg_0"]);
         }

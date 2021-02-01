@@ -27,7 +27,7 @@ namespace DeltaX.RestApiDemo1
             var connectionString = Configuration.GetConnectionString("RestApiDemo");
 
             DapperSqliteTypeHandler.SetSqliteTypeHandler();
-            services.AddSingleton<TableQueryFactory>(s => new TableQueryFactory(DialectType.SQLite));
+            services.AddSingleton<DemoTableQueryFactory>(s => new DemoTableQueryFactory());
             services.AddTransient<IDbConnection, SqliteConnection>(s =>
             {
                 var db = new SqliteConnection(connectionString);
@@ -45,8 +45,7 @@ namespace DeltaX.RestApiDemo1
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            CreateTable(app, env);
-            ConfigureTable(app, env);
+            CreateTable(app, env); 
 
             if (env.IsDevelopment())
             {
@@ -72,13 +71,6 @@ namespace DeltaX.RestApiDemo1
             var logger = app.ApplicationServices.GetService<ILogger>();
             var tableCrator = new TableCrator(connection, logger);
             tableCrator.Start();
-        }
-        
-        public void ConfigureTable(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            // Create todo schema
-            var queryFactory = app.ApplicationServices.GetService<TableQueryFactory>();
-            ConfigureTables.Configure(queryFactory);
-        }
+        } 
     }
 }

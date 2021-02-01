@@ -22,7 +22,7 @@
             return Expression.Lambda(expression).Compile().DynamicInvoke();
         }
 
-        internal static bool IsVariable(Expression expr)
+        internal static bool IsConstant(Expression expr)
         {
             return (expr is MemberExpression) && (((MemberExpression)expr).Expression is ConstantExpression);
         }
