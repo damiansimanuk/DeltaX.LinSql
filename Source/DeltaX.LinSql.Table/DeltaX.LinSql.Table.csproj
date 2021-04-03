@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Authors>DeltaX</Authors>
     <PackageProjectUrl>https://github.com/damiansimanuk/DeltaX.LinSql</PackageProjectUrl>
     <RepositoryUrl>https://github.com/damiansimanuk/DeltaX.LinSql</RepositoryUrl>
@@ -12,5 +12,9 @@
     <Description>Parse Poco Class and generate SQL Query for CRUD operations</Description>
     <Version>1.0.1</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+  </ItemGroup>
 
 </Project>
