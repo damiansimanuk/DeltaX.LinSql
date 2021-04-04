@@ -38,8 +38,8 @@
 
         public QueryStream Parse(TableQueryFactory tableFactory = null, QueryStream stream = null)
         {
-            tableFactory ??= TableQueryFactory.GetInstance(); 
-            stream = stream ?? new QueryStream(null, Builder.GetTables()); 
+            tableFactory ??= TableQueryFactory.GetInstance();
+            stream = stream ?? new QueryStream(null, Builder.GetTables());
 
             // DELETE
             if (Builder.TableDeleteType != null)
@@ -58,7 +58,7 @@
             }
             // SELECT
             else if (Builder.TableSelect.Any())
-            { 
+            {
                 return ParseSelect(tableFactory, stream, Builder.TableSelect);
             }
             // SELECT
@@ -78,7 +78,7 @@
             ParseJoin(tableFactory, stream);
             // WHERE
             ParseWhere(tableFactory, stream, entityType, entity);
-             
+
             return stream;
         }
 
@@ -99,7 +99,7 @@
         }
 
         private QueryStream ParseUpdate(TableQueryFactory tableFactory, QueryStream stream, Type entityType, object entity)
-        { 
+        {
             var tableUpdate = tableFactory.GetTable(entityType);
             stream.AddSql($"UPDATE {tableUpdate.Identifier}");
 
@@ -121,7 +121,7 @@
 
             return stream;
         }
-        
+
         private QueryStream ParseUpdateSet(TableQueryFactory tableFactory, QueryStream stream)
         {
             var allowedTables = Builder.GetTables();
@@ -175,7 +175,7 @@
             // JOIN
             ParseJoin(tableFactory, stream);
             // WHERE 
-            ParseWhere(tableFactory, stream); 
+            ParseWhere(tableFactory, stream);
 
             return stream;
         }
@@ -190,19 +190,23 @@
 
                 var s = new SelectParser(expression);
                 stream.AddSql(s.GetSql());
-            } 
+            }
 
             ParseFrom(tableFactory, stream);
             // JOIN
             ParseJoin(tableFactory, stream);
             // WHERE
             ParseWhere(tableFactory, stream);
+            // ORDER BY
+            ParseOrderBy(tableFactory, stream);
+            // LIMIT
+            ParseLimit(tableFactory, stream);
 
             return stream;
         }
 
-        private QueryStream ParseSelect(TableQueryFactory tableFactory, QueryStream stream, Dictionary<Type, object>  entities)
-        {   
+        private QueryStream ParseSelect(TableQueryFactory tableFactory, QueryStream stream, Dictionary<Type, object> entities)
+        {
             // SELECT
             stream.AddSql("SELECT ");
             var tablesColumnsSelect = entities
@@ -215,7 +219,11 @@
             // JOIN
             ParseJoin(tableFactory, stream);
             // WHERE
-            ParseWhere(tableFactory, stream, entities.Keys.First(), entities.Values.First()); 
+            ParseWhere(tableFactory, stream, entities.Keys.First(), entities.Values.First());
+            // ORDER BY
+            ParseOrderBy(tableFactory, stream);
+            // LIMIT
+            ParseLimit(tableFactory, stream);
 
             return stream;
         }
@@ -271,8 +279,38 @@
             return whereAdded;
         }
 
+        private int ParseOrderBy(TableQueryFactory tableFactory, QueryStream stream)
+        {
+            var allowedTables = Builder.GetTables();
+            var idx = 0;
+            foreach (var pair in Builder.ExpressionOrder)
+            {
+                var member = QueryHelper.GetFirstMemberExpression(pair.property, allowedTables) as MemberExpression;
+                var fieldName = member.Member.Name;
+                stream.AddOperator(idx == 0 ? "ORDER BY" : ",");
+                stream.AddTableField(member.Expression.Type, fieldName);
+                stream.AddOperator(pair.ascendant ? "ASC" : "DESC");
+                idx++;
+            }
+            return idx;
+        }
 
+        private int ParseLimit(TableQueryFactory tableFactory, QueryStream stream)
+        {
+            if (Builder.ExpressionLimit == null)
+            {
+                return 0;
+            }
+            var sql = tableFactory.DialectQuery.LimitFormatSql
+                .Replace("{SkipCount}", Builder.ExpressionLimit.Value.skipCount.ToString())
+                .Replace("{RowsPerPage}", Builder.ExpressionLimit.Value.rowsPerPage.ToString());
+
+            stream.AddSql(sql);
+            return 1;
+        }
     }
+
+
 
     public class QueryBuilder<T1> : QueryBuilder, IQueryBuilder<T1>
         where T1 : class
@@ -337,6 +375,18 @@
             Builder.Update<T1>(table);
             return this;
         }
+
+        public IQueryBuilder<T1> OrderBy<P>(Expression<Func<T1, P>> property, bool ascendant = true)
+        {
+            Builder.OrderBy(property, ascendant);
+            return this;
+        }
+
+        public IQueryBuilder<T1> Limit(int skipCount, int rowsPerPage)
+        {
+            Builder.Limit(skipCount, rowsPerPage);
+            return this;
+        }
     }
 
     public class QueryBuilder<T1, T2> : QueryBuilder<T1>, IQueryBuilder<T1, T2>
@@ -360,8 +410,8 @@
         {
             Builder.Select(properties);
             return this;
-        } 
-        
+        }
+
 
         public new IQueryBuilder<T1, T2> SelectAll()
         {
@@ -379,6 +429,18 @@
         public IQueryBuilder<T1, T2> Set<P>(Expression<Func<T1, P>> property, Expression<Func<T2, P>> value)
         {
             Builder.Set<T1>(property, value);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2> OrderBy<P>(Expression<Func<T1, T2, P>> property, bool ascendant = true)
+        {
+            Builder.OrderBy(property, ascendant);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2> Limit(int skipCount, int rowsPerPage)
+        {
+            Builder.Limit(skipCount, rowsPerPage);
             return this;
         }
     }
@@ -399,6 +461,18 @@
             var ret = new QueryBuilder<T1, T2, T3, T4>(Builder);
             Builder.Join<T4>(joinOn);
             return ret;
+        }
+
+        public IQueryBuilder<T1, T2, T3> OrderBy<P>(Expression<Func<T1, T2, T3, P>> property, bool ascendant = true)
+        {
+            Builder.OrderBy(property, ascendant);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3> Limit(int skipCount, int rowsPerPage)
+        {
+            Builder.Limit(skipCount, rowsPerPage);
+            return this;
         }
 
         public IQueryBuilder<T1, T2, T3> Select(Expression<Func<T1, T2, T3, object>> properties)

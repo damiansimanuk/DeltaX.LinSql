@@ -14,6 +14,7 @@
         public string DeleteQueryFormatSql { get; private set; }
         public string UpdateQueryFormatSql { get; private set; }
         public string CountQueryFormatSql { get; private set; }
+        public string LimitFormatSql { get; private set; }
         public DialectType Dialect { get; private set; }
 
         public DialectQuery(DialectType dialect)
@@ -42,6 +43,7 @@
                 case DialectType.SQLServer:
                     EncapsulationSql = "[{0}]";
                     IdentityQueryFormatSql = "SELECT SCOPE_IDENTITY() AS [id]";
+                    LimitFormatSql = "OFFSET {SkipCount} ROWS FETCH FIRST {RowsPerPage} ROWS ONLY ";
                     PagedListQueryFormatSql = "SELECT \n" +
                         "\t{SelectColumns} \n" +
                         "FROM {TableName} \n" +
@@ -56,6 +58,7 @@
         {
             EncapsulationSql = "\"{0}\"";
             IdentityQueryFormatSql = "SELECT LAST_INSERT_ROWID() AS id";
+            LimitFormatSql = "LIMIT {RowsPerPage} OFFSET {SkipCount} ";
             PagedListQueryFormatSql = "SELECT \n" +
                 "\t{SelectColumns} \n" +
                 "FROM {TableName} \n" +
@@ -256,6 +259,6 @@
                 .Replace("{WhereClause}", whereClause);
 
             return query;
-        }
+        } 
     }
 }
