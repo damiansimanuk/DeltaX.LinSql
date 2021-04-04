@@ -28,6 +28,8 @@ namespace DeltaX.LinSql.Query
         IQueryBuilder<T1> Set<P>(Expression<Func<T1, P>> property, Expression<Func<P>> value);
         IQueryBuilder<T1> Update(T1 table);
         IQueryBuilder<T1> Where(Expression<Func<T1, bool>> properties);
+        IQueryBuilder<T1> OrderBy<P>(Expression<Func<T1, P>> property, bool ascendant = true);
+        IQueryBuilder<T1> Limit(int skipCount, int rowsPerPage);
     }
 
     public interface IQueryBuilder<T1, T2> : IQueryBuilder<T1>
@@ -39,6 +41,8 @@ namespace DeltaX.LinSql.Query
         new IQueryBuilder<T1, T2> SelectAll();
         IQueryBuilder<T1, T2> Set<P>(Expression<Func<T1, P>> property, Expression<Func<T2, P>> value);
         IQueryBuilder<T1, T2> Where(Expression<Func<T1, T2, bool>> properties);
+        IQueryBuilder<T1, T2> OrderBy<P>(Expression<Func<T1, T2, P>> property, bool ascendant = true);
+        IQueryBuilder<T1, T2> Limit(int skipCount, int rowsPerPage);
     }
 
     public interface IQueryBuilder<T1, T2, T3> : IQueryBuilder<T1, T2>
@@ -52,6 +56,8 @@ namespace DeltaX.LinSql.Query
         new IQueryBuilder<T1, T2, T3> SelectAll();
         IQueryBuilder<T1, T2, T3> Set<P>(Expression<Func<T1, P>> property, Expression<Func<T2, T3, P>> value);
         IQueryBuilder<T1, T2, T3> Where(Expression<Func<T1, T2, T3, bool>> properties);
+        IQueryBuilder<T1, T2, T3> OrderBy<P>(Expression<Func<T1, T2, T3, P>> property, bool ascendant = true);
+        IQueryBuilder<T1, T2, T3> Limit(int skipCount, int rowsPerPage);
     }
 
     public interface IQueryBuilder<T1, T2, T3, T4> : IQueryBuilder<T1, T2, T3>

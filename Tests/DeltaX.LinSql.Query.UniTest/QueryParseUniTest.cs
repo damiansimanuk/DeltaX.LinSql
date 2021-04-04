@@ -736,7 +736,65 @@ namespace DeltaX.LinSql.Query.UniTest
             Assert.AreEqual(11, param["t_1_Id"]);
         }
 
+        [Test]
+        public void test_QueryBuilder_Select_Entity_Order_Asc()
+        {
+            var poco = new Poco { Id = 11, Active = true };
+            var q = new QueryBuilder<Poco>()
+                .Select(poco)
+                .OrderBy(p => p.Name);
 
-        
+            (var sql, var param) = q.GetSqlParameters();
+            sql = NormalizeString(sql);
+
+            Assert.AreEqual("SELECT t_1.\"idPoco\" as \"Id\", t_1.\"Name\", t_1.\"Updated\", t_1.\"Active\" " +
+                "FROM poco t_1 " +
+                "WHERE t_1.\"idPoco\" = @t_1_Id " +
+                "ORDER BY t_1.\"Name\" ASC", sql.Trim());
+            Assert.AreEqual(1, param.Count());
+            Assert.AreEqual(11, param["t_1_Id"]);
+        }
+
+        [Test]
+        public void test_QueryBuilder_Select_Entity_Order_Asc_Desc()
+        {
+            var poco = new Poco { Id = 11, Active = true };
+            var q = new QueryBuilder<Poco>()
+                .Select(poco)
+                .OrderBy(p => p.Name)
+                .OrderBy(p => p.Id, false);
+
+            (var sql, var param) = q.GetSqlParameters();
+            sql = NormalizeString(sql);
+
+            Assert.AreEqual("SELECT t_1.\"idPoco\" as \"Id\", t_1.\"Name\", t_1.\"Updated\", t_1.\"Active\" " +
+                "FROM poco t_1 " +
+                "WHERE t_1.\"idPoco\" = @t_1_Id " +
+                "ORDER BY t_1.\"Name\" ASC, t_1.\"idPoco\" DESC", sql.Trim());
+            Assert.AreEqual(1, param.Count());
+            Assert.AreEqual(11, param["t_1_Id"]);
+        }
+
+        [Test]
+        public void test_QueryBuilder_Select_Entity_Order_Asc_Desc_Limit()
+        {
+            var poco = new Poco { Id = 11, Active = true };
+            var q = new QueryBuilder<Poco>()
+                .Select(poco)
+                .OrderBy(p => p.Name)
+                .OrderBy(p => p.Id, false)
+                .Limit(1, 2);
+
+            (var sql, var param) = q.GetSqlParameters();
+            sql = NormalizeString(sql);
+
+            Assert.AreEqual("SELECT t_1.\"idPoco\" as \"Id\", t_1.\"Name\", t_1.\"Updated\", t_1.\"Active\" " +
+                "FROM poco t_1 " +
+                "WHERE t_1.\"idPoco\" = @t_1_Id " +
+                "ORDER BY t_1.\"Name\" ASC, t_1.\"idPoco\" DESC " +
+                "LIMIT 2 OFFSET 1", sql.Trim());
+            Assert.AreEqual(1, param.Count());
+            Assert.AreEqual(11, param["t_1_Id"]);
+        }
     }
 }
