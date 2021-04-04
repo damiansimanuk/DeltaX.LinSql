@@ -103,6 +103,24 @@ namespace DeltaX.LinSql.Table.Unitest
             Assert.AreEqual("SELECT \n\tt_1.\"idPoco\" as \"Id\"\n\t, t_1.\"Name\"\n\t, t_1.\"Updated\"\n\t, t_1.\"Active\" \nFROM poco t_1 \nWHERE t_1.\"idPoco\" = @Id", sql.Trim());
         }
 
+
+
+        [Test]
+        public void TestGetPagedListQuery()
+        {
+            ConfigureTalbes();
+            ConfigureTalbes();
+            var factory = TableQueryFactory.GetInstance();
+
+            var sql = factory.GetPagedListQuery<Poco>(0,1, "WHERE Id = @Id", "ORDER BY Id DESC");
+
+            Assert.AreEqual("SELECT \n\tt_1.\"idPoco\" as \"Id\"\n\t, t_1.\"Name\"\n\t, t_1.\"Updated\"\n\t, t_1.\"Active\" " +
+                "\nFROM poco t_1 " +
+                "\nWHERE Id = @Id " +
+                "\nORDER BY Id DESC " +
+                "\nLIMIT 1 OFFSET 0", sql.Trim());
+        }
+
         [Test]
         public void test_autoConfigured_table()
         {
