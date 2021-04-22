@@ -168,7 +168,7 @@
             return;
         }
 
-        public bool AddColumnSelector(Type tableType, string columnName)
+        public bool AddColumnSelector(Type tableType, string columnName, string columnAlias = null)
         {
             if (!tableFactory.IsConfiguredTable(tableType))
             {
@@ -178,7 +178,7 @@
             var table = tableFactory.GetTable(tableType);
             var column = table.Columns.FirstOrDefault(c => c.DtoFieldName == columnName);
             if (column != null)
-            { 
+            {
                 var dbColumn = tableFactory.DialectQuery.GetColumnFormated(column, table.Identifier);
                 sql.Append(sql.Length > 1 ? $", {dbColumn}" : dbColumn);
             }

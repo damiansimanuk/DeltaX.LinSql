@@ -8,19 +8,19 @@
     using System.Linq.Expressions;
     using System.Reflection;
 
-    public class QueryParser : ExpressionVisitor
+    public class ExpressionQueryParser : ExpressionVisitor
     {
         private QueryStream stream;
         private List<ExpressionType> operators;
 
-        public QueryParser(Expression expression, TableQueryFactory tableFactory = null, IEnumerable<Type> allowedTables = null)
+        public ExpressionQueryParser(Expression expression, TableQueryFactory tableFactory = null, IEnumerable<Type> allowedTables = null)
         {
             this.operators = new List<ExpressionType>();
             this.stream = new QueryStream(tableFactory, allowedTables);
             Visit(expression);
         }
 
-        public QueryParser(QueryStream stream)
+        public ExpressionQueryParser(QueryStream stream)
         {
             this.stream = stream;
             this.operators = new List<ExpressionType>();

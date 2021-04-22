@@ -7,18 +7,19 @@
 
     public class TableQueryBuilder
     {
-        
+
         private HashSet<Type> Tables { get; set; }
         public List<Expression> ExpressionWhere { get; private set; }
         public List<Expression> ExpressionSelect { get; private set; }
         public Dictionary<Type, Expression> ExpressionJoin { get; private set; }
         public Dictionary<Type, List<(Expression property, object value)>> ExpressionSet { get; private set; }
         public List<(Expression property, bool ascendant)> ExpressionOrder { get; private set; }
+        public List<(Expression property, string alias)> ExpressionAlias { get; private set; }
         public (int skipCount, int rowsPerPage)? ExpressionLimit { get; private set; }
         public bool IsSetValue { get; private set; }
         public object TableUpdate { get; private set; }
         public object TableDeleteEntity { get; private set; }
-        public Type TableDeleteType { get; private set; } 
+        public Type TableDeleteType { get; private set; }
         public Dictionary<Type, object> TableSelect { get; private set; }
 
         public TableQueryBuilder()
@@ -31,6 +32,7 @@
             ExpressionOrder = new List<(Expression property, bool ascendant)>();
             ExpressionLimit = null;
             TableSelect = new Dictionary<Type, object>();
+            ExpressionAlias = new List<(Expression property, string alias)>();
         }
 
         public IEnumerable<Type> GetTables()
@@ -62,8 +64,8 @@
         }
 
         internal void Where(Expression whereCondition)
-        {  
-            ExpressionWhere.Add(whereCondition); 
+        {
+            ExpressionWhere.Add(whereCondition);
         }
 
         internal void Select(Expression properties)
@@ -78,7 +80,7 @@
             AssertException(TableDeleteType == null, "Can't select element with delete statement!");
             GetTable(entityType);
 
-            TableSelect[entityType]= entity;
+            TableSelect[entityType] = entity;
         }
 
         internal void Join<T>(Expression properties)
@@ -122,15 +124,21 @@
         }
 
         internal void OrderBy(Expression property, bool ascendant = true)
-        { 
+        {
             AssertException(ExpressionSelect.Any() || TableSelect.Any(), "Can't Order element without select statement!");
-            ExpressionOrder.Add((property, ascendant)); 
+            ExpressionOrder.Add((property, ascendant));
         }
 
         internal void Limit(int skipCount, int rowsPerPage)
         {
             AssertException(ExpressionSelect.Any() || TableSelect.Any(), "Can't Order element without select statement!");
             ExpressionLimit = (skipCount, rowsPerPage);
+        }
+
+        internal void As(Expression property, string columnAlias)
+        {
+            AssertException(ExpressionSelect.Any() || TableSelect.Any(), "Can't add alias without select statement!");
+            ExpressionAlias.Add((property, columnAlias));
         }
     }
 }
