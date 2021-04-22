@@ -98,8 +98,13 @@
             return "WHERE " + string.Join(" AND ", pks.Select(c => $"{Encapsulation(c.DbColumnName, tableAlias)} = @{c.DtoFieldName}"));
         }
 
-        public string GetColumnFormated(ColumnConfiguration column, string tableAlias = null)
+        public string GetColumnFormated(ColumnConfiguration column, string tableAlias = null, string columnAlias = null)
         {
+            if (!string.IsNullOrWhiteSpace(columnAlias))
+            {
+                return $"{Encapsulation(column.DbColumnName, tableAlias)} as {Encapsulation(columnAlias)}";
+            }
+
             return column.DbAlias == null
                  ? Encapsulation(column.DbColumnName, tableAlias)
                  : $"{Encapsulation(column.DbColumnName, tableAlias)} as {Encapsulation(column.DbAlias)}";

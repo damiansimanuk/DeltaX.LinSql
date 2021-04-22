@@ -152,7 +152,7 @@
                             }
                             else if (valueMember != null && valueMember.NodeType != ExpressionType.Parameter)
                             {
-                                var qp = new QueryParser(stream);
+                                var qp = new ExpressionQueryParser(stream);
                                 qp.Visit(valExpr);
                             }
                             else
@@ -188,8 +188,14 @@
                 stream.AddSql(selecAdded ? "\n\t, " : "SELECT ");
                 selecAdded = true;
 
-                var s = new SelectParser(expression);
+                var s = new ExpressionSelectParser(expression);
                 stream.AddSql(s.GetSql());
+            }
+
+            // Add Extra Alias
+            if (Builder.ExpressionAlias.Any())
+            {
+                this.AddSelectAlias(stream);
             }
 
             ParseFrom(tableFactory, stream);
@@ -213,6 +219,12 @@
                 .Select(t => new { table = tableFactory.GetTable(t.Key), entity = t.Value })
                 .Select(t => tableFactory.DialectQuery.GetSelectColumns(t.table, t.table.Identifier));
             stream.AddSql($"\n\t{string.Join("\n\t, ", tablesColumnsSelect)}");
+            
+            // Add Extra Alias
+            if (Builder.ExpressionAlias.Any())
+            {
+                this.AddSelectAlias(stream);
+            }
 
             // FROM
             ParseFrom(tableFactory, stream);
@@ -244,7 +256,7 @@
                 var tableName = tableFactory.DialectQuery.GetTableName(tableJoin, tableJoin.Identifier);
 
                 stream.AddSql($" \nJOIN {tableName} ON ");
-                var qp = new QueryParser(stream);
+                var qp = new ExpressionQueryParser(stream);
                 qp.Visit(table.Value);
             }
             return Builder.ExpressionJoin.Count();
@@ -257,7 +269,7 @@
             {
                 stream.AddSql(whereAdded > 0 ? "\n\tAND " : "\nWHERE ");
 
-                var qp = new QueryParser(stream);
+                var qp = new ExpressionQueryParser(stream);
                 qp.Visit(expression);
                 whereAdded++;
             }
@@ -277,6 +289,16 @@
             }
 
             return whereAdded;
+        }
+
+        public void AddSelectAlias(QueryStream stream)
+        {
+            var allowedTables = Builder.GetTables();
+            foreach (var pair in Builder.ExpressionAlias)
+            {
+                var member = QueryHelper.GetFirstMemberExpression(pair.property, allowedTables) as MemberExpression;
+                stream.AddColumnSelector(member.Expression.Type, member.Member.Name, pair.alias);
+            }
         }
 
         private int ParseOrderBy(TableQueryFactory tableFactory, QueryStream stream)
@@ -387,6 +409,12 @@
             Builder.Limit(skipCount, rowsPerPage);
             return this;
         }
+
+        public IQueryBuilder<T1> As<P>(Expression<Func<T1, P>> property, string columnAlias)
+        {
+            Builder.As(property, columnAlias);
+            return this;
+        }
     }
 
     public class QueryBuilder<T1, T2> : QueryBuilder<T1>, IQueryBuilder<T1, T2>
@@ -443,6 +471,12 @@
             Builder.Limit(skipCount, rowsPerPage);
             return this;
         }
+
+        public IQueryBuilder<T1, T2> As<P>(Expression<Func<T1, T2, P>> property, string columnAlias)
+        {
+            Builder.As(property, columnAlias);
+            return this;
+        }
     }
 
     public class QueryBuilder<T1, T2, T3> : QueryBuilder<T1, T2>, IQueryBuilder<T1, T2, T3>
@@ -472,6 +506,12 @@
         public IQueryBuilder<T1, T2, T3> Limit(int skipCount, int rowsPerPage)
         {
             Builder.Limit(skipCount, rowsPerPage);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3> As<P>(Expression<Func<T1, T2, T3, P>> property, string columnAlias)
+        {
+            Builder.As(property, columnAlias);
             return this;
         }
 

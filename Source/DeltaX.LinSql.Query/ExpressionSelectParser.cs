@@ -8,12 +8,12 @@
     using System.Linq.Expressions;
     using System.Reflection;
 
-    public class SelectParser : ExpressionVisitor
+    public class ExpressionSelectParser : ExpressionVisitor
     {
         private QueryStream stream;  
         private bool openBrace;
 
-        public SelectParser(Expression expression, TableQueryFactory tableFactory = null, IEnumerable<Type> allowedTables = null,
+        public ExpressionSelectParser(Expression expression, TableQueryFactory tableFactory = null, IEnumerable<Type> allowedTables = null,
             int? paramGeneratorOffset = null, bool openBrace = false)
         {
             this.openBrace = openBrace;
@@ -21,7 +21,7 @@
             Visit(expression);
         }
 
-        public SelectParser(QueryStream stream)
+        public ExpressionSelectParser(QueryStream stream)
         {
             this.stream = stream; 
         }
