@@ -362,6 +362,12 @@
             return this;
         }
 
+        public IQueryBuilder<T1> Select<P>(Expression<Func<T1, P>> property, string columnAlias)
+        {
+            Builder.SelectAlias(property, columnAlias);
+            return this;
+        }
+
         public IQueryBuilder<T1> SelectAll()
         {
             Builder.SelectEntity(typeof(T1), null);
@@ -408,13 +414,7 @@
         {
             Builder.Limit(skipCount, rowsPerPage);
             return this;
-        }
-
-        public IQueryBuilder<T1> As<P>(Expression<Func<T1, P>> property, string columnAlias)
-        {
-            Builder.As(property, columnAlias);
-            return this;
-        }
+        } 
     }
 
     public class QueryBuilder<T1, T2> : QueryBuilder<T1>, IQueryBuilder<T1, T2>
@@ -440,6 +440,18 @@
             return this;
         }
 
+        public new IQueryBuilder<T1, T2> Select<TEntity>(TEntity entity = null)
+           where TEntity : class
+        {
+            Builder.SelectEntity(typeof(TEntity), entity);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2> Select<P>(Expression<Func<T1, T2, P>> property, string columnAlias)
+        {
+            Builder.SelectAlias(property, columnAlias);
+            return this;
+        }
 
         public new IQueryBuilder<T1, T2> SelectAll()
         {
@@ -466,15 +478,9 @@
             return this;
         }
 
-        public IQueryBuilder<T1, T2> Limit(int skipCount, int rowsPerPage)
+        public new IQueryBuilder<T1, T2> Limit(int skipCount, int rowsPerPage)
         {
             Builder.Limit(skipCount, rowsPerPage);
-            return this;
-        }
-
-        public IQueryBuilder<T1, T2> As<P>(Expression<Func<T1, T2, P>> property, string columnAlias)
-        {
-            Builder.As(property, columnAlias);
             return this;
         }
     }
@@ -501,7 +507,20 @@
         {
             Builder.Select(properties);
             return this;
-        } 
+        }
+
+        public new IQueryBuilder<T1, T2, T3> Select<TEntity>(TEntity entity = null)
+           where TEntity : class
+        {
+            Builder.SelectEntity(typeof(TEntity), entity);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3> Select<P>(Expression<Func<T1, T2, T3, P>> property, string columnAlias)
+        {
+            Builder.SelectAlias(property, columnAlias);
+            return this;
+        }
 
         public new IQueryBuilder<T1, T2, T3> SelectAll()
         {
@@ -529,17 +548,11 @@
             return this;
         }
 
-        public IQueryBuilder<T1, T2, T3> Limit(int skipCount, int rowsPerPage)
+        public new IQueryBuilder<T1, T2, T3> Limit(int skipCount, int rowsPerPage)
         {
             Builder.Limit(skipCount, rowsPerPage);
             return this;
-        }
-
-        public IQueryBuilder<T1, T2, T3> As<P>(Expression<Func<T1, T2, T3, P>> property, string columnAlias)
-        {
-            Builder.As(property, columnAlias);
-            return this;
-        }
+        } 
     }
 
     public class QueryBuilder<T1, T2, T3, T4> : QueryBuilder<T1, T2, T3>, IQueryBuilder<T1, T2, T3, T4>
@@ -564,6 +577,19 @@
         public IQueryBuilder<T1, T2, T3, T4> Select(Expression<Func<T1, T2, T3, T4, object>> properties)
         {
             Builder.Select(properties);
+            return this;
+        }
+
+        public new IQueryBuilder<T1, T2, T3, T4> Select<TEntity>(TEntity entity = null)
+           where TEntity : class
+        {
+            Builder.SelectEntity(typeof(TEntity), entity);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4> Select<P>(Expression<Func<T1, T2, T3, T4, P>> property, string columnAlias)
+        {
+            Builder.SelectAlias(property, columnAlias);
             return this;
         }
 
@@ -594,17 +620,11 @@
             return this;
         }
 
-        public IQueryBuilder<T1, T2, T3, T4> Limit(int skipCount, int rowsPerPage)
+        public new IQueryBuilder<T1, T2, T3, T4> Limit(int skipCount, int rowsPerPage)
         {
             Builder.Limit(skipCount, rowsPerPage);
             return this;
-        }
-
-        public IQueryBuilder<T1, T2, T3, T4> As<P>(Expression<Func<T1, T2, T3, T4, P>> property, string columnAlias)
-        {
-            Builder.As(property, columnAlias);
-            return this;
-        }
+        } 
     }
 
     public class QueryBuilder<T1, T2, T3, T4, T5> : QueryBuilder<T1, T2, T3, T4>, IQueryBuilder<T1, T2, T3, T4, T5>
@@ -630,6 +650,19 @@
         public IQueryBuilder<T1, T2, T3, T4, T5> Select(Expression<Func<T1, T2, T3, T4, T5, object>> properties)
         {
             Builder.Select(properties);
+            return this;
+        }
+
+        public new IQueryBuilder<T1, T2, T3, T4, T5> Select<TEntity>(TEntity entity = null)
+          where TEntity : class
+        {
+            Builder.SelectEntity(typeof(TEntity), entity);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5> Select<P>(Expression<Func<T1, T2, T3, T4, T5, P>> property, string columnAlias)
+        {
+            Builder.SelectAlias(property, columnAlias);
             return this;
         }
 
@@ -661,17 +694,11 @@
             return this;
         }
 
-        public IQueryBuilder<T1, T2, T3, T4, T5> Limit(int skipCount, int rowsPerPage)
+        public new IQueryBuilder<T1, T2, T3, T4, T5> Limit(int skipCount, int rowsPerPage)
         {
             Builder.Limit(skipCount, rowsPerPage);
             return this;
-        }
-
-        public IQueryBuilder<T1, T2, T3, T4, T5> As<P>(Expression<Func<T1, T2, T3, T4, T5, P>> property, string columnAlias)
-        {
-            Builder.As(property, columnAlias);
-            return this;
-        }
+        } 
     }
 
     public class QueryBuilder<T1, T2, T3, T4, T5, T6> : QueryBuilder<T1, T2, T3, T4, T5>, IQueryBuilder<T1, T2, T3, T4, T5, T6>
@@ -691,6 +718,20 @@
         public IQueryBuilder<T1, T2, T3, T4, T5, T6> Select(Expression<Func<T1, T2, T3, T4, T5, T6, object>> properties)
         {
             Builder.Select(properties);
+            return this;
+        }
+
+
+        public new IQueryBuilder<T1, T2, T3, T4, T5, T6> Select<TEntity>(TEntity entity = null)
+          where TEntity : class
+        {
+            Builder.SelectEntity(typeof(TEntity), entity);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5, T6> Select<P>(Expression<Func<T1, T2, T3, T4, T5, T6, P>> property, string columnAlias)
+        {
+            Builder.SelectAlias(property, columnAlias);
             return this;
         }
 
@@ -723,15 +764,9 @@
             return this;
         }
 
-        public IQueryBuilder<T1, T2, T3, T4, T5, T6> Limit(int skipCount, int rowsPerPage)
+        public new IQueryBuilder<T1, T2, T3, T4, T5, T6> Limit(int skipCount, int rowsPerPage)
         {
             Builder.Limit(skipCount, rowsPerPage);
-            return this;
-        }
-
-        public IQueryBuilder<T1, T2, T3, T4, T5, T6> As<P>(Expression<Func<T1, T2, T3, T4, T5, T6, P>> property, string columnAlias)
-        {
-            Builder.As(property, columnAlias);
             return this;
         }
     }

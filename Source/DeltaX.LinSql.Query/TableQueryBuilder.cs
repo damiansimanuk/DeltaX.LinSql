@@ -135,7 +135,7 @@
             ExpressionLimit = (skipCount, rowsPerPage);
         }
 
-        internal void As(Expression property, string columnAlias)
+        internal void SelectAlias(Expression property, string columnAlias)
         {
             AssertException(ExpressionSelect.Any() || TableSelect.Any(), "Can't add alias without select statement!");
             ExpressionAlias.Add((property, columnAlias));
