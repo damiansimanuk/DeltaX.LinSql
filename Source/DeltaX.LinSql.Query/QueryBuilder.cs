@@ -497,24 +497,6 @@
             return ret;
         }
 
-        public IQueryBuilder<T1, T2, T3> OrderBy<P>(Expression<Func<T1, T2, T3, P>> property, bool ascendant = true)
-        {
-            Builder.OrderBy(property, ascendant);
-            return this;
-        }
-
-        public IQueryBuilder<T1, T2, T3> Limit(int skipCount, int rowsPerPage)
-        {
-            Builder.Limit(skipCount, rowsPerPage);
-            return this;
-        }
-
-        public IQueryBuilder<T1, T2, T3> As<P>(Expression<Func<T1, T2, T3, P>> property, string columnAlias)
-        {
-            Builder.As(property, columnAlias);
-            return this;
-        }
-
         public IQueryBuilder<T1, T2, T3> Select(Expression<Func<T1, T2, T3, object>> properties)
         {
             Builder.Select(properties);
@@ -540,6 +522,24 @@
             Builder.Where(properties);
             return this;
         }
+
+        public IQueryBuilder<T1, T2, T3> OrderBy<P>(Expression<Func<T1, T2, T3, P>> property, bool ascendant = true)
+        {
+            Builder.OrderBy(property, ascendant);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3> Limit(int skipCount, int rowsPerPage)
+        {
+            Builder.Limit(skipCount, rowsPerPage);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3> As<P>(Expression<Func<T1, T2, T3, P>> property, string columnAlias)
+        {
+            Builder.As(property, columnAlias);
+            return this;
+        }
     }
 
     public class QueryBuilder<T1, T2, T3, T4> : QueryBuilder<T1, T2, T3>, IQueryBuilder<T1, T2, T3, T4>
@@ -551,6 +551,14 @@
         public QueryBuilder(TableQueryBuilder builder = null) : base(builder)
         {
             Builder.AddTable<T4>();
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5> Join<T5>(Expression<Func<T1, T2, T3, T4, T5, bool>> joinOn)
+            where T5 : class
+        {
+            var ret = new QueryBuilder<T1, T2, T3, T4, T5>(Builder);
+            Builder.Join<T5>(joinOn);
+            return ret;
         }
 
         public IQueryBuilder<T1, T2, T3, T4> Select(Expression<Func<T1, T2, T3, T4, object>> properties)
@@ -579,6 +587,153 @@
             Builder.Where(properties);
             return this;
         }
-    } 
+
+        public IQueryBuilder<T1, T2, T3, T4> OrderBy<P>(Expression<Func<T1, T2, T3, T4, P>> property, bool ascendant = true)
+        {
+            Builder.OrderBy(property, ascendant);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4> Limit(int skipCount, int rowsPerPage)
+        {
+            Builder.Limit(skipCount, rowsPerPage);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4> As<P>(Expression<Func<T1, T2, T3, T4, P>> property, string columnAlias)
+        {
+            Builder.As(property, columnAlias);
+            return this;
+        }
+    }
+
+    public class QueryBuilder<T1, T2, T3, T4, T5> : QueryBuilder<T1, T2, T3, T4>, IQueryBuilder<T1, T2, T3, T4, T5>
+        where T1 : class
+        where T2 : class
+        where T3 : class
+        where T4 : class
+        where T5 : class
+    {
+        public QueryBuilder(TableQueryBuilder builder = null) : base(builder)
+        {
+            Builder.AddTable<T4>();
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5, T6> Join<T6>(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> joinOn)
+           where T6 : class
+        {
+            var ret = new QueryBuilder<T1, T2, T3, T4, T5, T6>(Builder);
+            Builder.Join<T5>(joinOn);
+            return ret;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5> Select(Expression<Func<T1, T2, T3, T4, T5, object>> properties)
+        {
+            Builder.Select(properties);
+            return this;
+        }
+
+        public new IQueryBuilder<T1, T2, T3, T4, T5> SelectAll()
+        {
+            Builder.SelectEntity(typeof(T1), null);
+            Builder.SelectEntity(typeof(T2), null);
+            Builder.SelectEntity(typeof(T3), null);
+            Builder.SelectEntity(typeof(T4), null);
+            Builder.SelectEntity(typeof(T5), null);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5> Set<P>(Expression<Func<T1, P>> property, Expression<Func<T2, T3, T4, T5, P>> value)
+        {
+            Builder.Set<T1>(property, value);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5> Where(Expression<Func<T1, T2, T3, T4, T5, bool>> properties)
+        {
+            Builder.Where(properties);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5> OrderBy<P>(Expression<Func<T1, T2, T3, T4, T5, P>> property, bool ascendant = true)
+        {
+            Builder.OrderBy(property, ascendant);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5> Limit(int skipCount, int rowsPerPage)
+        {
+            Builder.Limit(skipCount, rowsPerPage);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5> As<P>(Expression<Func<T1, T2, T3, T4, T5, P>> property, string columnAlias)
+        {
+            Builder.As(property, columnAlias);
+            return this;
+        }
+    }
+
+    public class QueryBuilder<T1, T2, T3, T4, T5, T6> : QueryBuilder<T1, T2, T3, T4, T5>, IQueryBuilder<T1, T2, T3, T4, T5, T6>
+       where T1 : class
+       where T2 : class
+       where T3 : class
+       where T4 : class
+       where T5 : class
+       where T6 : class
+    {
+        public QueryBuilder(TableQueryBuilder builder = null) : base(builder)
+        {
+            Builder.AddTable<T4>();
+        }
+         
+
+        public IQueryBuilder<T1, T2, T3, T4, T5, T6> Select(Expression<Func<T1, T2, T3, T4, T5, T6, object>> properties)
+        {
+            Builder.Select(properties);
+            return this;
+        }
+
+        public new IQueryBuilder<T1, T2, T3, T4, T5, T6> SelectAll()
+        {
+            Builder.SelectEntity(typeof(T1), null);
+            Builder.SelectEntity(typeof(T2), null);
+            Builder.SelectEntity(typeof(T3), null);
+            Builder.SelectEntity(typeof(T4), null);
+            Builder.SelectEntity(typeof(T5), null);
+            Builder.SelectEntity(typeof(T6), null);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5, T6> Set<P>(Expression<Func<T1, P>> property, Expression<Func<T2, T3, T4, T5, T6, P>> value)
+        {
+            Builder.Set<T1>(property, value);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5, T6> Where(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> properties)
+        {
+            Builder.Where(properties);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5, T6> OrderBy<P>(Expression<Func<T1, T2, T3, T4, T5, T6, P>> property, bool ascendant = true)
+        {
+            Builder.OrderBy(property, ascendant);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5, T6> Limit(int skipCount, int rowsPerPage)
+        {
+            Builder.Limit(skipCount, rowsPerPage);
+            return this;
+        }
+
+        public IQueryBuilder<T1, T2, T3, T4, T5, T6> As<P>(Expression<Func<T1, T2, T3, T4, T5, T6, P>> property, string columnAlias)
+        {
+            Builder.As(property, columnAlias);
+            return this;
+        }
+    }
 }
 
