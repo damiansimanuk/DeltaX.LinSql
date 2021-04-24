@@ -115,10 +115,10 @@
 
         public void AddIsNullOrEmpty(Type tableType, string columnName, bool not)
         {
-            var table = tableFactory.GetTable(tableType); 
+            var table = tableFactory.GetTable(tableType);
             var column = table.Columns.FirstOrDefault(c => c.DtoFieldName == columnName);
             if (column != null)
-            { 
+            {
                 var property = tableFactory.DialectQuery.Encapsulation(column.DbColumnName, table.Identifier);
                 sql.Append(not ? $"ISNULL({property}, '') <> ''" : $"ISNULL({property}, '') = ''");
             }
@@ -179,7 +179,7 @@
             var column = table.Columns.FirstOrDefault(c => c.DtoFieldName == columnName);
             if (column != null)
             {
-                var dbColumn = tableFactory.DialectQuery.GetColumnFormated(column, table.Identifier);
+                var dbColumn = tableFactory.DialectQuery.GetColumnFormated(column, table.Identifier, columnAlias);
                 sql.Append(sql.Length > 1 ? $", {dbColumn}" : dbColumn);
             }
             return column != null;
