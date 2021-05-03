@@ -11,7 +11,7 @@
         private HashSet<Type> Tables { get; set; }
         public List<Expression> ExpressionWhere { get; private set; }
         public List<Expression> ExpressionSelect { get; private set; }
-        public Dictionary<Type, Expression> ExpressionJoin { get; private set; }
+        public List<(Type type, Expression property, JoinType joinType)> ExpressionJoin { get; private set; }
         public Dictionary<Type, List<(Expression property, object value)>> ExpressionSet { get; private set; }
         public List<(Expression property, bool ascendant)> ExpressionOrder { get; private set; }
         public List<(Expression property, string alias)> ExpressionAlias { get; private set; }
@@ -27,7 +27,7 @@
             Tables = new HashSet<Type>();
             ExpressionWhere = new List<Expression>();
             ExpressionSelect = new List<Expression>();
-            ExpressionJoin = new Dictionary<Type, Expression>();
+            ExpressionJoin = new List<(Type type, Expression property, JoinType joinType)>();
             ExpressionSet = new Dictionary<Type, List<(Expression, object)>>();
             ExpressionOrder = new List<(Expression property, bool ascendant)>();
             ExpressionLimit = null;
@@ -83,10 +83,10 @@
             TableSelect[entityType] = entity;
         }
 
-        internal void Join<T>(Expression properties)
+        internal void Join<T>(Expression properties, JoinType joinType = JoinType.Join)
         {
             var table = GetTable(typeof(T));
-            ExpressionJoin[table] = properties;
+            ExpressionJoin.Add((table, properties, joinType));
         }
 
 

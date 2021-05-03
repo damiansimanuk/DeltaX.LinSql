@@ -250,14 +250,22 @@
 
         private int ParseJoin(TableQueryFactory tableFactory, QueryStream stream)
         {
-            foreach (var table in Builder.ExpressionJoin)
+            foreach (var expr in Builder.ExpressionJoin)
             {
-                var tableJoin = tableFactory.GetTable(table.Key);
+                var tableJoin = tableFactory.GetTable(expr.type);
                 var tableName = tableFactory.DialectQuery.GetTableName(tableJoin, tableJoin.Identifier);
 
-                stream.AddSql($" \nJOIN {tableName} ON ");
+                var join = "JOIN";
+                switch (expr.joinType)
+                {
+                    case JoinType.InnerJoin: join = "INNER JOIN"; break;
+                    case JoinType.LeftJoin: join = "LEFT JOIN"; break;
+                    case JoinType.RightJoin: join = "RIGHT JOIN"; break;
+                }
+
+                stream.AddSql($" \n{join} {tableName} ON ");
                 var qp = new ExpressionQueryParser(stream);
-                qp.Visit(table.Value);
+                qp.Visit(expr.property);
             }
             return Builder.ExpressionJoin.Count();
         }
@@ -342,10 +350,10 @@
             AddTable<T1>();
         }
 
-        public IQueryBuilder<T1, T2> Join<T2>(Expression<Func<T1, T2, bool>> joinOn) where T2 : class
+        public IQueryBuilder<T1, T2> Join<T2>(Expression<Func<T1, T2, bool>> joinOn, JoinType joinType = JoinType.Join) where T2 : class
         {
             var ret = new QueryBuilder<T1, T2>(Builder);
-            Builder.Join<T2>(joinOn);
+            Builder.Join<T2>(joinOn, joinType);
             return ret;
         }
 
@@ -426,11 +434,11 @@
             Builder.AddTable<T2>();
         }
 
-        public IQueryBuilder<T1, T2, T3> Join<T3>(Expression<Func<T1, T2, T3, bool>> joinOn)
+        public IQueryBuilder<T1, T2, T3> Join<T3>(Expression<Func<T1, T2, T3, bool>> joinOn, JoinType joinType = JoinType.Join)
             where T3 : class
         {
             var ret = new QueryBuilder<T1, T2, T3>(Builder);
-            Builder.Join<T3>(joinOn);
+            Builder.Join<T3>(joinOn, joinType);
             return ret;
         }
 
@@ -495,11 +503,11 @@
             Builder.AddTable<T3>();
         }
 
-        public IQueryBuilder<T1, T2, T3, T4> Join<T4>(Expression<Func<T1, T2, T3, T4, bool>> joinOn)
+        public IQueryBuilder<T1, T2, T3, T4> Join<T4>(Expression<Func<T1, T2, T3, T4, bool>> joinOn, JoinType joinType = JoinType.Join)
             where T4 : class
         {
             var ret = new QueryBuilder<T1, T2, T3, T4>(Builder);
-            Builder.Join<T4>(joinOn);
+            Builder.Join<T4>(joinOn, joinType);
             return ret;
         }
 
@@ -566,11 +574,11 @@
             Builder.AddTable<T4>();
         }
 
-        public IQueryBuilder<T1, T2, T3, T4, T5> Join<T5>(Expression<Func<T1, T2, T3, T4, T5, bool>> joinOn)
+        public IQueryBuilder<T1, T2, T3, T4, T5> Join<T5>(Expression<Func<T1, T2, T3, T4, T5, bool>> joinOn, JoinType joinType = JoinType.Join)
             where T5 : class
         {
             var ret = new QueryBuilder<T1, T2, T3, T4, T5>(Builder);
-            Builder.Join<T5>(joinOn);
+            Builder.Join<T5>(joinOn, joinType);
             return ret;
         }
 
@@ -639,11 +647,11 @@
             Builder.AddTable<T4>();
         }
 
-        public IQueryBuilder<T1, T2, T3, T4, T5, T6> Join<T6>(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> joinOn)
+        public IQueryBuilder<T1, T2, T3, T4, T5, T6> Join<T6>(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> joinOn, JoinType joinType = JoinType.Join)
            where T6 : class
         {
             var ret = new QueryBuilder<T1, T2, T3, T4, T5, T6>(Builder);
-            Builder.Join<T5>(joinOn);
+            Builder.Join<T5>(joinOn, joinType);
             return ret;
         }
 

@@ -20,7 +20,7 @@ namespace DeltaX.LinSql.Query
         where T1 : class
     {
         IQueryBuilder<T1> Delete(T1 entity = null);
-        IQueryBuilder<T1, T2> Join<T2>(Expression<Func<T1, T2, bool>> joinOn) where T2 : class;
+        IQueryBuilder<T1, T2> Join<T2>(Expression<Func<T1, T2, bool>> joinOn, JoinType joinType = JoinType.Join) where T2 : class;
         IQueryBuilder<T1> Select(Expression<Func<T1, object>> properties);
         IQueryBuilder<T1> Select<TEntity>(TEntity entity = null) where TEntity : class;
         IQueryBuilder<T1> Select<P>(Expression<Func<T1, P>> property, string columnAlias);
@@ -38,7 +38,7 @@ namespace DeltaX.LinSql.Query
         where T1 : class
         where T2 : class
     {
-        IQueryBuilder<T1, T2, T3> Join<T3>(Expression<Func<T1, T2, T3, bool>> joinOn) where T3 : class;
+        IQueryBuilder<T1, T2, T3> Join<T3>(Expression<Func<T1, T2, T3, bool>> joinOn, JoinType joinType = JoinType.Join) where T3 : class;
         IQueryBuilder<T1, T2> Select(Expression<Func<T1, T2, object>> properties);
         new IQueryBuilder<T1, T2> Select<TEntity>(TEntity entity = null) where TEntity : class; 
         IQueryBuilder<T1, T2> Select<P>(Expression<Func<T1, T2, P>> property, string columnAlias);
@@ -55,7 +55,7 @@ namespace DeltaX.LinSql.Query
         where T3 : class
     {
 
-        IQueryBuilder<T1, T2, T3, T4> Join<T4>(Expression<Func<T1, T2, T3, T4, bool>> joinOn) where T4 : class;
+        IQueryBuilder<T1, T2, T3, T4> Join<T4>(Expression<Func<T1, T2, T3, T4, bool>> joinOn, JoinType joinType = JoinType.Join) where T4 : class;
         IQueryBuilder<T1, T2, T3> Select(Expression<Func<T1, T2, T3, object>> properties);
         new IQueryBuilder<T1, T2, T3> Select<TEntity>(TEntity entity = null) where TEntity : class;
         IQueryBuilder<T1, T2, T3> Select<P>(Expression<Func<T1, T2, T3, P>> property, string columnAlias);
@@ -72,7 +72,7 @@ namespace DeltaX.LinSql.Query
         where T3 : class
         where T4 : class
     {
-        IQueryBuilder<T1, T2, T3, T4, T5> Join<T5>(Expression<Func<T1, T2, T3, T4, T5, bool>> joinOn) where T5 : class;
+        IQueryBuilder<T1, T2, T3, T4, T5> Join<T5>(Expression<Func<T1, T2, T3, T4, T5, bool>> joinOn, JoinType joinType = JoinType.Join) where T5 : class;
         IQueryBuilder<T1, T2, T3, T4> Select(Expression<Func<T1, T2, T3, T4, object>> properties);
         new IQueryBuilder<T1, T2, T3, T4> Select<TEntity>(TEntity entity = null) where TEntity : class;
         IQueryBuilder<T1, T2, T3, T4> Select<P>(Expression<Func<T1, T2, T3, T4, P>> property, string columnAlias);
@@ -90,7 +90,7 @@ namespace DeltaX.LinSql.Query
        where T4 : class
        where T5 : class
     {
-        IQueryBuilder<T1, T2, T3, T4, T5, T6> Join<T6>(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> joinOn) where T6 : class;
+        IQueryBuilder<T1, T2, T3, T4, T5, T6> Join<T6>(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> joinOn, JoinType joinType = JoinType.Join) where T6 : class;
         IQueryBuilder<T1, T2, T3, T4, T5> Select(Expression<Func<T1, T2, T3, T4, T5, object>> properties);
         new IQueryBuilder<T1, T2, T3, T4, T5> Select<TEntity>(TEntity entity = null) where TEntity : class;
         IQueryBuilder<T1, T2, T3, T4, T5> Select<P>(Expression<Func<T1, T2, T3, T4, T5, P>> property, string columnAlias);
